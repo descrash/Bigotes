@@ -1,4 +1,5 @@
-﻿using DSharpPlus;
+﻿using Bigotes.Commands;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
@@ -68,10 +69,13 @@ namespace Bigotes
                 StringPrefixes = new string[] { ConfigJson.Prefix },
                 EnableDms = false,
                 EnableMentionPrefix = true,
-                DmHelp = true
+                DmHelp = true,
+                IgnoreExtraArguments = true
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
+
+            Commands.RegisterCommands<TestCommands>();
             #endregion
 
             await Client.ConnectAsync();
