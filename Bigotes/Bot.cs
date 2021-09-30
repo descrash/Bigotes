@@ -75,7 +75,8 @@ namespace Bigotes
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
-            Commands.RegisterCommands<TestCommands>();
+            Commands.RegisterCommands<BasicCommands>();
+            Commands.RegisterCommands<DiceCommands>();
             #endregion
 
             await Client.ConnectAsync();
