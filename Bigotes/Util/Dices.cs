@@ -35,12 +35,15 @@ namespace Bigotes.Util
             {
                 rand = new Random();
 
+                #region Comprobación de formato
                 if (!Regex.IsMatch(input.Trim(), @"[1-9]\d?d[1-9]\d?(([+-][([1-9]\d?d[1-9]\d?)([1-9]\d?)])*"))
                 {
                     throw new Exception("Error en el formato de entrada.");
                 }
+                #endregion
 
-                foreach(char c in input.Trim())
+                #region Obtención de operadores
+                foreach (char c in input.Trim())
                 {
                     if(c == '+' || c == '-')
                     {
@@ -48,10 +51,13 @@ namespace Bigotes.Util
                     }
                 }
                 operandos = input.Trim().Split('+', '-');
+                #endregion
+
                 diceNumber = new int[operandos.Length];
                 diceRoll = new int[operandos.Length];
                 diceValue = new int[operandos.Length];
 
+                #region Obtención de operandos y operación
                 for (int i = 0; i < operandos.Length; i++)
                 {
                     subStr = operandos[i].Split('d');
@@ -81,6 +87,7 @@ namespace Bigotes.Util
                     {
                         totalValue += diceValue[i];
                     }
+                    #endregion
                 }
             }
             catch(Exception ex)

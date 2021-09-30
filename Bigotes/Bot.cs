@@ -69,8 +69,8 @@ namespace Bigotes
                 StringPrefixes = new string[] { ConfigJson.Prefix },
                 EnableDms = false,
                 EnableMentionPrefix = true,
-                DmHelp = true,
-                IgnoreExtraArguments = true
+                IgnoreExtraArguments = true,
+                //EnableDefaultHelp = false, <- ASEGURARSE DE TENER COMANDO DE AYUDA PROPIO
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);

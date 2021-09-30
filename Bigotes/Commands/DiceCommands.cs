@@ -17,20 +17,28 @@ namespace Bigotes.Commands
         /// <param name="input"></param>
         /// <returns></returns>
         [Command("roll")]
-        public async Task Roll(CommandContext ctx, string input)
+        [Description("Efectúa una tirada de dados con el formato 00d00 +/- 00.")]
+        [RequireRoles(RoleCheckMode.Any, "@everyone")]
+        public async Task Roll(CommandContext ctx, [Description("Tirada de dados.")]string tirada)
         {
             string output;
             Dices dices = new Dices();
 
-            output = dices.Roll(input).ToString();
-            
-            if (output == "-1")
+            output = dices.Roll(tirada).ToString();
+
+            switch(output)
             {
-                ctx.Channel.SendMessageAsync("`[CARGANDO MENSAJE DE ERROR]` ```Error en ejecución de comando.``` `[CARGANDO SUGERENCIA]` ```Por favor, utilice el formato 00d00 (opcional +/- 00).```").ConfigureAwait(false);
-            }
-            else
-            {
-                ctx.Channel.SendMessageAsync("`[CARGANDO RESULTADO]` ```Resultado: " + output + ".```").ConfigureAwait(false);
+                case "-1":
+                    ctx.Channel.SendMessageAsync("`[CARGANDO MENSAJE DE ERROR]` ```Error en ejecución de comando.``` `[CARGANDO SUGERENCIA]` ```Por favor, utilice el formato 00d00 (opcional +/- 00).```").ConfigureAwait(false);
+                    break;
+
+                case "1":
+                    ctx.Channel.SendMessageAsync("`[CARGANDO RESULTADO DESASTROSO]` ```Resultado: " + output + ".``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable realizar la creación de una ficha nueva.```").ConfigureAwait(false);
+                    break;
+
+                default:
+                    ctx.Channel.SendMessageAsync("`[CARGANDO RESULTADO]` ```Resultado: " + output + ".```").ConfigureAwait(false);
+                    break;
             }
         }
     }
