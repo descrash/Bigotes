@@ -2,6 +2,8 @@
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -19,6 +21,11 @@ namespace Bigotes
         /// Cliente de Discord
         /// </summary>
         public DiscordClient Client { get; private set; }
+
+        /// <summary>
+        /// Extensión de interactividad
+        /// </summary>
+        public InteractivityExtension Interactivity { get; private set; }
 
         /// <summary>
         /// Extensión de comandos
@@ -62,6 +69,14 @@ namespace Bigotes
             #endregion
 
             Client.Ready += OnClientReady;
+
+            #region Interactividad con el canal (leer, interactuar)
+            Client.UseInteractivity(new InteractivityConfiguration
+            {
+                PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
+                Timeout = TimeSpan.FromMinutes(5) //Tiempo de espera de interacciones (leer mensajes, p.ej.)
+            });
+            #endregion
 
             #region Comandos
             CommandsNextConfiguration commandsConfig = new CommandsNextConfiguration

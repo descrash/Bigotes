@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bigotes.Util;
+using System;
 
 namespace Bigotes
 {
@@ -6,7 +7,12 @@ namespace Bigotes
     {
         static void Main(string[] args)
         {
+            #region Ajustes de propiedades iniciales
+            Properties.cordialidad = 50;
+            #endregion
+
             Bot bot = new Bot();
+
             bot.RunAsync().GetAwaiter().GetResult();
         }
     }
