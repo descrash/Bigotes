@@ -29,7 +29,7 @@ namespace Bigotes.Commands
                     break;
 
                 case int n when (n > 0 && n <= 25):
-                    await ctx.Channel.SendMessageAsync(lvlCordialidad + "```No-me-apetece-aguantar-bookahs.```").ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync(lvlCordialidad + "```No-se-encuentran-ganas-de-aguantar-bookahs.```").ConfigureAwait(false);
                     break;
 
                 case int n when (n > 25 && n <= 45):
