@@ -15,30 +15,12 @@ namespace Bigotes.Commands
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        [Command("encuesta")]
-        public async Task Poll(CommandContext ctx)
-        {
-            //var interactivity = ctx.Client.GetInteractivity();
-
-            await ctx.Channel.SendMessageAsync("`[ERROR]` ```Opción-no-implementada.```").ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Comando de espera y comprobación
-        /// de procedencia de mensaje (PRUEBA)
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <returns></returns>
-        //[Command("responde")]
-        //public async Task Responde(CommandContext ctx)
+        //[Command("encuesta")]
+        //public async Task Poll(CommandContext ctx)
         //{
-        //    var interactivity = ctx.Client.GetInteractivity();
+        //    //var interactivity = ctx.Client.GetInteractivity();
 
-        //    //El mensaje es del mismo canal quel cliente
-        //    var message = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
-        //    //interactivity.WaitForReactionAsync <<<=== esperar por emoji/reacción en lugar de mensaje
-
-        //    await ctx.Channel.SendMessageAsync(message.Result.Content);
+        //    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Opción-no-implementada.```").ConfigureAwait(false);
         //}
     }
 }

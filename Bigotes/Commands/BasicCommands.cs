@@ -18,6 +18,7 @@ namespace Bigotes.Commands
         /// <param name="comCtx"></param>
         /// <returns></returns>
         [Command("saluda")]
+        [Description("Saluda con un tono u otro dependiendo de su cordialidad.")]
         public async Task Greetings(CommandContext ctx)
         {
             string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Properties.cordialidad + "%]` ";
@@ -62,7 +63,8 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("ajusta")]
-        public async Task Ajustar(CommandContext ctx, string propiedad)
+        [Description("Comando para ajustar estas propiedades: cordialidad.")]
+        public async Task Ajustar(CommandContext ctx, [Description("Nombre de la propiedad.")]string propiedad)
         {
             var interactivity = ctx.Client.GetInteractivity();
 
@@ -92,24 +94,6 @@ namespace Bigotes.Commands
                     /*Abierto a otras propiedades*/
             }
             #endregion
-        }
-
-        /// <summary>
-        /// Comando de espera y comprobación
-        /// de procedencia de mensaje (PRUEBA)
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <returns></returns>
-        [Command("responde")]
-        public async Task Responde(CommandContext ctx)
-        {
-            var interactivity = ctx.Client.GetInteractivity();
-
-            //El mensaje es del mismo canal quel cliente
-            var message = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
-            //interactivity.WaitForReactionAsync <<<=== esperar por emoji/reacción en lugar de mensaje
-
-            await ctx.Channel.SendMessageAsync(message.Result.Content);
         }
     }
 }

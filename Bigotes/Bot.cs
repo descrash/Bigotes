@@ -78,7 +78,7 @@ namespace Bigotes
             Client.UseInteractivity(new InteractivityConfiguration
             {
                 PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromMinutes(1) //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
+                Timeout = TimeSpan.FromMinutes(30) //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
             });
             #endregion
 
