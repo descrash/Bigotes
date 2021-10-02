@@ -70,11 +70,15 @@ namespace Bigotes
 
             Client.Ready += OnClientReady;
 
+            #region Gestiones varias
+
+            #endregion
+
             #region Interactividad con el canal (leer, interactuar)
             Client.UseInteractivity(new InteractivityConfiguration
             {
                 PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromDays(36500) //Tiempo de espera de interacciones (leer mensajes, p.ej.), ajustado a 100 años, por si acaso :D
+                Timeout = TimeSpan.FromMinutes(1) //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
             });
             #endregion
 
@@ -92,6 +96,7 @@ namespace Bigotes
 
             #region Registro de comandos
             Commands.RegisterCommands<BasicCommands>();
+            Commands.RegisterCommands<InteractivityCommands>();
             Commands.RegisterCommands<DiceCommands>();
             Commands.RegisterCommands<PollCommands>();
             #endregion

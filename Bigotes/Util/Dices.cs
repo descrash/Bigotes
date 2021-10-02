@@ -112,6 +112,7 @@ namespace Bigotes.Util
 
                             if (resultado == 1)
                             {
+                                //Recogemos la pifia para su comprobación
                                 diceValue[i] = resultado;
                                 hayPifia = true;
                                 RESULTADOS.Add("[PIFIA]");

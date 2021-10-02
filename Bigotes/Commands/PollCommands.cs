@@ -11,29 +11,6 @@ namespace Bigotes.Commands
     public class PollCommands : BaseCommandModule
     {
         /// <summary>
-        /// Comando para crear un mensaje cuyos iconos puedan
-        /// afectar distintos aspectos (roles, votaciones, etc)
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <returns></returns>
-        [Command("lista")]
-        public async Task Lista(CommandContext ctx, string opcion)
-        {
-            var interactivity = ctx.Client.GetInteractivity();
-
-            switch (opcion)
-            {
-                case "de roles":
-
-                    break;
-            }
-
-            var message = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
-
-            await ctx.Channel.SendMessageAsync("`[ERROR]` ```Opción-no-implementada.```").ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Comando para realizar una encuesta
         /// </summary>
         /// <param name="ctx"></param>
