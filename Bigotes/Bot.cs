@@ -74,7 +74,7 @@ namespace Bigotes
             Client.UseInteractivity(new InteractivityConfiguration
             {
                 PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromMinutes(5) //Tiempo de espera de interacciones (leer mensajes, p.ej.)
+                Timeout = TimeSpan.FromDays(36500) //Tiempo de espera de interacciones (leer mensajes, p.ej.), ajustado a 100 años, por si acaso :D
             });
             #endregion
 
@@ -90,8 +90,12 @@ namespace Bigotes
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
+            #region Registro de comandos
             Commands.RegisterCommands<BasicCommands>();
             Commands.RegisterCommands<DiceCommands>();
+            Commands.RegisterCommands<PollCommands>();
+            #endregion
+
             #endregion
 
             await Client.ConnectAsync();

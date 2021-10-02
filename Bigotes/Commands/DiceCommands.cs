@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,27 +19,34 @@ namespace Bigotes.Commands
         /// <returns></returns>
         [Command("roll")]
         [Description("Efectúa una tirada de dados con el formato 00d00 +/- 00.")]
-        [RequireRoles(RoleCheckMode.Any, "@everyone")]
-        public async Task Roll(CommandContext ctx, [Description("Tirada de dados.")]string tirada)
+        //[RequireRoles(RoleCheckMode.Any, "@everyone")]
+        public async Task Roll(CommandContext ctx, [Description("Tirada de dados.")][RemainingText]string tirada)
         {
-            string output, msg;
+            List<string> output = new List<string>();
+            string values = String.Empty,totalValue = String.Empty, msg;
             Dices dices = new Dices();
 
-            output = dices.Roll(tirada).ToString();
+            output = dices.Roll(tirada.Trim());
 
-            switch(output)
+            if (output == null || output.Count == 0)
             {
-                case "-1":
-                    msg = "`[CARGANDO MENSAJE DE ERROR]` ```Error-en-ejecución-de-comando.``` `[CARGANDO SUGERENCIA]` ```Por-favor,-utilice-el-formato-00d00-sumando-de-cero-a-infinito-añadidos).```";
-                    break;
+                msg = "`[CARGANDO MENSAJE DE ERROR]` ```Error-en-ejecución-de-comando.``` `[CARGANDO SUGERENCIA]` ```Por-favor,-utilice-el-formato-00d00-sumando-de-cero-a-infinito-añadidos).```";
+            }
+            else if (output.Last() == "Resultado: [1]")
+            {
+                msg = "`[CARGANDO RESULTADO: " + output.First() + ", DESASTROSO]` ```Resultado: [PIFIA]``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.```";
+            }
+            else
+            {
+                foreach (string str in output)
+                {
+                    if (!str.Contains("Resultado"))
+                        values += " " + str;
+                    else
+                        totalValue = str;
+                }
 
-                case "1":
-                    msg = "`[CARGANDO RESULTADO DESASTROSO]` ```Resultado: " + output + ".``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.```";
-                    break;
-
-                default:
-                    msg = "`[CARGANDO RESULTADO]` ```Resultado: " + output + ".```";
-                    break;
+                msg = "`[CARGANDO RESULTADOS:" + values + " ]`\n`[CALCULANDO BONIFICADORES Y PENALIZADORES]` ```" + totalValue + ".```";
             }
 
             await ctx.Channel.SendMessageAsync(msg).ConfigureAwait(false);

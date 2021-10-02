@@ -22,7 +22,8 @@ namespace Bigotes.Commands
         {
             string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Properties.cordialidad + "%]` ";
 
-            switch(Properties.cordialidad)
+            #region Saludos en función de cordialidad
+            switch (Properties.cordialidad)
             {
                 case 0:
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Así-te-atragantes-con-sustancias-orgánicas-cuya-fecha-de-expiración-ha-concluido-hace-una-considerable-cantidad-de-tiempo.```").ConfigureAwait(false);
@@ -52,6 +53,7 @@ namespace Bigotes.Commands
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Estoy-aquí-para-servirle,-oh,-gran-deidad-entre-las-deidades-más-esplendorosas-del-esplendor-orgánico.```").ConfigureAwait(false);
                     break;
             }
+            #endregion
         }
 
         /// <summary>
@@ -64,7 +66,8 @@ namespace Bigotes.Commands
         {
             var interactivity = ctx.Client.GetInteractivity();
 
-            switch(propiedad)
+            #region Comprobación de propiedad solicitada
+            switch (propiedad)
             {
                 case "cordialidad":
                     await ctx.Channel.SendMessageAsync("```Orden-recibida.-Cordialidad-al-" + Properties.cordialidad + "%-¿A-qué-nivel-debo-ajustarla?```").ConfigureAwait(false);
@@ -85,7 +88,10 @@ namespace Bigotes.Commands
                     }
 
                     break;
+
+                    /*Abierto a otras propiedades*/
             }
+            #endregion
         }
 
         /// <summary>
