@@ -26,37 +26,30 @@ namespace Bigotes.Commands
             {
                 case 0:
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Así-te-atragantes-con-sustancias-orgánicas-cuya-fecha-de-expiración-ha-concluido-hace-una-considerable-cantidad-de-tiempo.```").ConfigureAwait(false);
-
                     break;
 
                 case int n when (n > 0 && n <= 25):
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```No-me-apetece-aguantar-bookahs.```").ConfigureAwait(false);
-
                     break;
 
                 case int n when (n > 25 && n <= 45):
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Ganas-de-saludar-no-encontradas.```").ConfigureAwait(false);
-
                     break;
 
                 case int n when (n > 45 && n <= 55):
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Hola.```").ConfigureAwait(false);
-
                     break;
 
                 case int n when (n > 55 && n <= 75):
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Saludos,-miembro-indispensable-en-esta-agradable-comunidad.-¿En-qué-te-puedo-ayudar?```").ConfigureAwait(false);
-
                     break;
 
                 case int n when (n > 75 && n < 100):
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Hoy-hace-un-gran-día-y-tú-tienes-una-gran-y-brillante-sonrisa. Buen-día.```").ConfigureAwait(false);
-
                     break;
 
                 case 100:
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Estoy-aquí-para-servirle,-oh,-gran-deidad-entre-las-deidades-más-esplendorosas-del-esplendor-orgánico.```").ConfigureAwait(false);
-
                     break;
             }
         }
