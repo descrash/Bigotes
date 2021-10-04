@@ -14,64 +14,63 @@ namespace Bigotes.Commands
     {
         /// <summary>
         /// Comando para activar la interactividad
-        /// de roles (esto es provisional, no funciona bien)
+        /// de roles. IMPORTANTE QUE TENGA PERMISOS PARA
+        /// GESTIONAR ROLES
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("roles")]
+        [Description("Comando para activar la escucha de roles. Aún en proceso.")]
         public async Task Gestion(CommandContext ctx)
         {
-            /*PROBLEMAS*/
-            //El tiempo de espera de interactividad tiene su límite, además de que la misma se apaga (deja de escuchar)
-            //cuando se ha triggereado la primera vez.
-            //Los nombres de los iconos, por culpa del puto ascii, vienen como iconos (:knife: == 🔪), ergo no es posible ponerlo
-            //por letras, hay que copiar y pegar como tal los iconos. Supongo que con iconos personalizados ESO NO PASA. Ya lo probaré.
-            //No me cambia los roles. Ignoro por qué. El miembro que elige es el mío, el rol bien. Pero no lo hace. Se la suda todo.
-            //Tal vez sea cosa de los permisos. Abajo se puede ver que he probado con ID y con nombre de rol.
-
-
             var interactivity = ctx.Client.GetInteractivity();
 
-            var message = await interactivity.WaitForReactionAsync(x => x.Channel.Name == "roles").ConfigureAwait(false);
+            var message = await interactivity.WaitForReactionAsync(x => x.Channel.Name == "⚙-roles").ConfigureAwait(false);
+
+            DiscordRole rol;
 
             //await ctx.Channel.SendMessageAsync(message.Result.User.Mention + " ha reaccionado con " + message.Result.Emoji);
 
             switch(message.Result.Emoji.Name)
             {
-                case "🔪":
-                    //await ctx.Member.GrantRoleAsync(ctx.Guild.GetRole(893873018739228712)).ConfigureAwait(false);
-                    //await ctx.Member.GrantRoleAsync(ctx.Guild.Roles.Values.Where(x => x.Name == "Susurros").First()).ConfigureAwait(false);
+                case ":priorato:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Priorato").First();
                     break;
 
-                case ":shield:":
-                    await ctx.Member.GrantRoleAsync(ctx.Guild.Roles.Values.Where(x => x.Name == "Vigilia").First()).ConfigureAwait(false);
+                case ":susurros:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Susurros").First();
                     break;
 
-                case ":eggplant:":
-                    await ctx.Member.GrantRoleAsync(ctx.Guild.Roles.Values.Where(x => x.Name == "Sylvari").First()).ConfigureAwait(false);
+                case ":vigilia:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Vigilia").First();
+                    break;
+
+                case ":HojaBrillante:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Fuerzas Krytenses").First();
+                    break;
+
+                case ":charr:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Altas Legiones").First();
+                    break;
+
+                case ":sylvari:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Sylvari").First();
+                    break;
+
+                case ":mundo:":
+                    rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Narradores").First();
+                    break;
+
+                default:
+                    rol = null;
                     break;
             }
-        }
 
-
-        [Command("respondmessage")]
-        public async Task RespondMessage(CommandContext ctx)
-        {
-            var interactivity = ctx.Client.GetInteractivity();
-
-            var message = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
-
-            await ctx.Channel.SendMessageAsync(message.Result.Content);
-        }
-
-        [Command("respondreaction")]
-        public async Task RespondReaction(CommandContext ctx)
-        {
-            var interactivity = ctx.Client.GetInteractivity();
-
-            var message = await interactivity.WaitForReactionAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
-
-            await ctx.Channel.SendMessageAsync(message.Result.Emoji);
+            if (rol != null)
+            {
+                //Error
+                await ctx.Member.GrantRoleAsync(rol).ConfigureAwait(false);
+            }
         }
     }
 }

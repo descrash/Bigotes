@@ -70,6 +70,8 @@ namespace Bigotes
 
             Client.Ready += OnClientReady;
 
+            //await ctx.Channel.SendMessageAsync("`[ACTIVADO PROTOCOLO BOT-DE-BIGOTES]` ```Funciones-principales-activadas.-Bot-a-la-escucha.```");
+
             #region Gestiones varias
 
             #endregion
@@ -98,7 +100,7 @@ namespace Bigotes
             Commands.RegisterCommands<BasicCommands>();
             Commands.RegisterCommands<InteractivityCommands>();
             Commands.RegisterCommands<DiceCommands>();
-            Commands.RegisterCommands<PollCommands>();
+            //Commands.RegisterCommands<PollCommands>();
             #endregion
 
             #endregion
