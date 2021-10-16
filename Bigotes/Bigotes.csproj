@@ -35,4 +35,8 @@
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0-nightly-01011" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Content\Gifs\" />
+  </ItemGroup>
+
 </Project>

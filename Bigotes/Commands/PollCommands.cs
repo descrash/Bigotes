@@ -14,42 +14,22 @@ namespace Bigotes.Commands
     public class PollCommands : BaseCommandModule
     {
         /// <summary>
-        /// Comando para realizar una encuesta
+        /// Comando para la creación de una encuesta
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="duration">Duración</param>
-        /// <param name="options">Opciones</param>
+        /// <param name="titulo">Título de la encuesta</param>
         /// <returns></returns>
-        [Command("poll")]
-        [Description("Comando para realizar una encuesta nueva.")]
-        public async Task Descartado(CommandContext ctx, [Description("Título de la encuesta.")][RemainingText]string title, [Description("Duración de la encuesta.")]TimeSpan duration, [Description("Opciones (emojis) de la encuesta.")]params DiscordEmoji[] emojiOptions)
-        {
-            string msg = String.Empty;
-
-            msg = "`[PROCESANDO PETICIÓN]` ```Realizando-embebido-de-prueba-para-encuesta.```";
-            await ctx.Channel.SendMessageAsync(msg).ConfigureAwait(false);
-
-            var interactivity = ctx.Client.GetInteractivity();
-            var options = emojiOptions.Select(x => x.ToString());
-
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = title,
-                Description = string.Join(" ", options)
-            };
-
-            await ctx.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-        }
-
-
         [Command("encuesta")]
-        [Description("Comando para realizar una encuesta nueva.")]
-        public async Task Poll(CommandContext ctx, params DiscordEmoji[] emojiOptions)
+        [Description("Comando para realizar una encuesta nueva introduciendo titulo.")]
+        public async Task Poll(CommandContext ctx, [Description("Título de la encuesta.")][RemainingText]string titulo)
         {
             #region ATRIBUTOS ENCUESTA
             TimeSpan duration = new TimeSpan();
-            string description = String.Empty;
             DiscordMember author = ctx.Member;
+            string description = String.Empty;
+            string numOptions = "0";
+            string urlEncuesta = String.Empty;
+            List<DiscordEmoji> emojiOptions = new List<DiscordEmoji>();
             #endregion
 
             await ctx.Channel.SendMessageAsync("`[PROCESANDO PETICIÓN]` ```Orden-recibida.-Preciso-concretar-duración-en-minutos(m),-horas(h)-o-días(d):```").ConfigureAwait(false);
@@ -57,14 +37,14 @@ namespace Bigotes.Commands
             var interactivity = ctx.Client.GetInteractivity();
 
             #region Recogida y gestión de la duración de la encuesta
-            var durationMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
+            var durationMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false);
             string durationSTR = durationMSG.Result.Content.Trim(), unidadRespuesta;
             int durationINT = 0;
 
             while (!Regex.IsMatch(durationSTR, @"\d[mhd]"))
             {
                 await ctx.Channel.SendMessageAsync("`[ERROR]` ```Por-favor,-utilizar-formato-00m,-00h-o-00d.```").ConfigureAwait(false);
-                durationMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
+                durationMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false);
                 durationSTR = durationMSG.Result.Content.Trim();
             }
 
@@ -88,21 +68,47 @@ namespace Bigotes.Commands
             }
             #endregion
 
+            #region Recogida y gestión de la descripción
             await ctx.Channel.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Se-precisa-texto-descriptivo:```").ConfigureAwait(false);
 
-            description = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false)).Result.Content;
+            description = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
+            #endregion
 
-            var options = emojiOptions.Select(x => x.ToString());
+            #region Registro de número de opciones
+            await ctx.Channel.SendMessageAsync("`[RECOGIENDO DESCRIPCIÓN]` ```¿Número-de-opciones?```");
+
+            numOptions = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
+            while (!Regex.IsMatch(numOptions, @"\d"))
+            {
+                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Por-favor,-utilizar-formato-de-numero-entero-positivo.```").ConfigureAwait(false);
+                numOptions = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
+            }
+            #endregion
+
+            #region Obtención de emojis para las opciones (reacciones)
+            var emojiMSG = await ctx.Channel.SendMessageAsync("`[NÚMERO AJUSTADO]` ```Necesarias-reacciones-a-este-mensaje-con-los-emojis-utilizados-en-cada-opción.```");
+
+            while(emojiOptions.Count < Int32.Parse(numOptions))
+            {
+                var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == emojiMSG && x.User == author).ConfigureAwait(false);
+
+                emojiOptions.Add(reactionResult.Result.Emoji);
+            }
+            #endregion
+
+            #region Creación de encuesta
+            await ctx.Channel.SendMessageAsync("`[OPCIONES RECOGIDAS]` ```Se-han-recogido-las-opciones.-Procesando-encuesta...```");
 
             var pollEmbed = new DiscordEmbedBuilder
             {
-                Title = "Encuesta-de-" + author.DisplayName,
+                Title = titulo,
                 Author = new DiscordEmbedBuilder.EmbedAuthor
                 {
                     Name = author.DisplayName,
                     IconUrl = author.AvatarUrl
                 },
-                Description = string.Join(description, options)
+                Description = description,
+                Color = DiscordColor.Blue
             };
 
             var pollMessage = await ctx.Channel.SendMessageAsync(embed: pollEmbed).ConfigureAwait(false);
@@ -117,7 +123,12 @@ namespace Bigotes.Commands
 
             var results = distinctResult.Select(x => $"{x.Emoji}: {x.Total}");
 
-            await ctx.Channel.SendMessageAsync(string.Join("\n", results)).ConfigureAwait(false);
+            var msgFinal = "`AVISO DE FINAL DE ENCUESTA` ```Finalizada-encuesta: " + titulo + "``` ```Resultados:```";
+
+            await pollMessage.RespondAsync(msgFinal + "```" + string.Join("\n", results) + "```");
+            
+            //await ctx.Channel.SendMessageAsync(string.Join("\n", results)).ConfigureAwait(false);
+            #endregion
         }
     }
 }
