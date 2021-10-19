@@ -34,7 +34,7 @@ namespace Bigotes.Commands
             }
             else if (output.Last() == "Resultado: [1]")
             {
-                msg = "`[CARGANDO RESULTADO: " + output.First() + ", DESASTROSO]` ```Resultado: [PIFIA]``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.```";
+                msg = "`[CARGANDO RESULTADO: " + output.First() + ", DESASTROSO]` ```Resultado: [PIFIA]``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.``` `[CARGANDO GRABACIÓN DE VOZ DE MURETHOR]` ```[S'a matao Paco]```";
             }
             else
             {

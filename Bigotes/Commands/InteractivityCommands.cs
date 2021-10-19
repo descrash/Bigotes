@@ -31,7 +31,8 @@ namespace Bigotes.Commands
 
             //await ctx.Channel.SendMessageAsync(message.Result.User.Mention + " ha reaccionado con " + message.Result.Emoji);
 
-            switch(message.Result.Emoji.Name)
+            #region Lista de iconos y roles
+            switch (message.Result.Emoji.Name)
             {
                 case ":priorato:":
                     rol = ctx.Guild.Roles.Values.Where(x => x.Name == "Priorato").First();
@@ -65,10 +66,10 @@ namespace Bigotes.Commands
                     rol = null;
                     break;
             }
+            #endregion
 
             if (rol != null)
             {
-                //Error
                 await ctx.Member.GrantRoleAsync(rol).ConfigureAwait(false);
             }
         }

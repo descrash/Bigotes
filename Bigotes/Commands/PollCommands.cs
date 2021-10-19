@@ -88,7 +88,7 @@ namespace Bigotes.Commands
             #region Obtención de emojis para las opciones (reacciones)
             var emojiMSG = await ctx.Channel.SendMessageAsync("`[NÚMERO AJUSTADO]` ```Necesarias-reacciones-a-este-mensaje-con-los-emojis-utilizados-en-cada-opción.```");
 
-            while(emojiOptions.Count < Int32.Parse(numOptions))
+            while(emojiOptions.Count <= Int32.Parse(numOptions))
             {
                 var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == emojiMSG && x.User == author).ConfigureAwait(false);
 

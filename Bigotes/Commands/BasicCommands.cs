@@ -124,8 +124,9 @@ namespace Bigotes.Commands
             {
                 Title = titulo,
                 Description = string.Join("\n\n", descripcion),
-                Color = DiscordColor.Blue
-                //ImageUrl = "../Content/Gifs/Bigotes_salute.gif"
+                Color = DiscordColor.Blue,
+                ImageUrl = "https://2.bp.blogspot.com/-MwcSL7ZTAEE/XLbHeiFwAJI/AAAAAAABXpM/9mGV0FrU3ecm3qpDQAvmB4MkUjtCzfkMACLcBGAs/s1600/Professor%2BMew%2BIcon.jpg", //"https://ibb.co/Yt74yy7" //No funciona bien... gif demasiado grande? No acepta gifs?
+                
             };
 
             await ctx.Channel.SendMessageAsync(embed: presentacionEmbed).ConfigureAwait(false);
