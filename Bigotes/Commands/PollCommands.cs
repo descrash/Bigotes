@@ -88,11 +88,13 @@ namespace Bigotes.Commands
             #region Obtención de emojis para las opciones (reacciones)
             var emojiMSG = await ctx.Channel.SendMessageAsync("`[NÚMERO AJUSTADO]` ```Necesarias-reacciones-a-este-mensaje-con-los-emojis-utilizados-en-cada-opción.```");
 
-            while(emojiOptions.Count <= Int32.Parse(numOptions))
+            while(emojiOptions.Count < Int32.Parse(numOptions))
             {
                 var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == emojiMSG && x.User == author).ConfigureAwait(false);
 
                 emojiOptions.Add(reactionResult.Result.Emoji);
+
+                await ctx.Channel.SendMessageAsync("```Procesada-opción-" + emojiOptions.Count + ":" + reactionResult.Result.Emoji.Name + "```").ConfigureAwait(false);
             }
             #endregion
 
@@ -123,9 +125,9 @@ namespace Bigotes.Commands
 
             var results = distinctResult.Select(x => $"{x.Emoji}: {x.Total}");
 
-            var msgFinal = "`AVISO DE FINAL DE ENCUESTA` ```Finalizada-encuesta: " + titulo + "``` ```Resultados:```";
+            var msgFinal = "`ENCUESTA " + titulo + " FINALIZADA` ```Resultados:```";
 
-            await pollMessage.RespondAsync(msgFinal + "```" + string.Join("\n", results) + "```");
+            await pollMessage.RespondAsync(msgFinal + string.Join("\n", results));
             
             //await ctx.Channel.SendMessageAsync(string.Join("\n", results)).ConfigureAwait(false);
             #endregion
