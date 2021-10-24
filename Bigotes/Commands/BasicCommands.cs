@@ -117,10 +117,14 @@ namespace Bigotes.Commands
                 Title = titulo,
                 Description = string.Join("\n\n", descripcion),
                 Color = DiscordColor.Blue,
-                ImageUrl = "https://2.bp.blogspot.com/-MwcSL7ZTAEE/XLbHeiFwAJI/AAAAAAABXpM/9mGV0FrU3ecm3qpDQAvmB4MkUjtCzfkMACLcBGAs/s1600/Professor%2BMew%2BIcon.jpg", //"https://ibb.co/Yt74yy7" //No funciona bien... gif demasiado grande? No acepta gifs?
+                //ImageUrl = Constantes.ICON_BIGOTES,
                 Footer = new DiscordEmbedBuilder.EmbedFooter
                 {
                     Text = "Patrocinio de Zokab International S.L."
+                },
+                Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail
+                {
+                    Url = Constantes.ICON_BIGOTES
                 }
             };
 
@@ -155,9 +159,10 @@ namespace Bigotes.Commands
             if (eres.ToUpper().ElementAt(0) == 'E' && eres.ToUpper().ElementAt(1) == 'S' && eres.ElementAt(2) == ' ')
             {
                 string resultado = String.Empty;
+                string parrafoFinal = String.Empty;
                 string url = "https://wiki-es.guildwars2.com/wiki/";
                 string busqueda = eres.Substring(3);
-                busqueda = busqueda.Replace('?', ' ');
+                busqueda = busqueda.Replace("?", String.Empty);
                 busqueda = busqueda.Replace(' ', '_');
 
                 using (WebClient client = new WebClient())
@@ -167,9 +172,10 @@ namespace Bigotes.Commands
 
                 String[] separadoresParrafo = { "<p>", "</p>" };
 
-                await ctx.Channel.SendMessageAsync("`EXTRAYENDO FRAGMENTO DE WIKIPEDIA` ```html\n" + resultado.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1] + "```").ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync("`EXTRAYENDO FRAGMENTO DE LA BASE DE DATOS DE RATA SUM` ```html\n"
+                    + Regex.Replace(resultado.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1], "<.*?>", String.Empty)
+                    + "``` Fuente: " + url + busqueda).ConfigureAwait(false);
             }
-            //ES... ->>>> Búsqueda en la Wikipedia?
         }
     }
 }
