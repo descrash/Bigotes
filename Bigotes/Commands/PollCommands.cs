@@ -68,6 +68,15 @@ namespace Bigotes.Commands
             }
             #endregion
 
+            #region Recogida y gestión del canal en el que realizar la encuesta
+            //await ctx.Channel.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Detallar-canal-de-encuesta:```").ConfigureAwait(false);
+
+            //string channelName = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
+            
+            //List<DiscordChannel> channels = 
+
+            #endregion
+
             #region Recogida y gestión de la descripción
             await ctx.Channel.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Se-precisa-texto-descriptivo:```").ConfigureAwait(false);
 

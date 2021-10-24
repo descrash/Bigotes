@@ -6,6 +6,7 @@ using DSharpPlus.Interactivity.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -52,7 +53,7 @@ namespace Bigotes.Commands
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Hoy-hace-un-gran-día-y-tú-tienes-una-gran-y-brillante-sonrisa. Buen-día.```").ConfigureAwait(false);
                     break;
 
-                case 100:
+                default:
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Estoy-aquí-para-servirle,-oh,-gran-deidad-entre-las-deidades-más-esplendorosas-del-esplendor-orgánico.```").ConfigureAwait(false);
                     break;
             }
@@ -78,18 +79,9 @@ namespace Bigotes.Commands
 
                     var porcentaje = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
 
-                    if(!Regex.IsMatch(porcentaje.Result.Content.Trim(), @"\d%"))
-                    {
-                        await ctx.Channel.SendMessageAsync("`[CARGANDO MENSAJE DE ERROR]` ```Error-en-formato.``` `[CARGANDO SUGERENCIA]` ```Usar-formato-00%.```");
-                    }
-                    else
-                    {
-                        int nivel = Int32.Parse(porcentaje.Result.Content.Trim().Split('%')[0]);
+                    string msg = Properties.AjustarCordialidad(porcentaje.Result.Content);
 
-                        Properties.cordialidad = nivel;
-
-                        await ctx.Channel.SendMessageAsync("`[CARGANDO MENSAJE DE CONFIRMACIÓN]` ```Ajustada-cordialidad-al-" + nivel + "%.```");
-                    }
+                    await ctx.Channel.SendMessageAsync(msg);
 
                     break;
 
@@ -126,7 +118,10 @@ namespace Bigotes.Commands
                 Description = string.Join("\n\n", descripcion),
                 Color = DiscordColor.Blue,
                 ImageUrl = "https://2.bp.blogspot.com/-MwcSL7ZTAEE/XLbHeiFwAJI/AAAAAAABXpM/9mGV0FrU3ecm3qpDQAvmB4MkUjtCzfkMACLcBGAs/s1600/Professor%2BMew%2BIcon.jpg", //"https://ibb.co/Yt74yy7" //No funciona bien... gif demasiado grande? No acepta gifs?
-                
+                Footer = new DiscordEmbedBuilder.EmbedFooter
+                {
+                    Text = "Patrocinio de Zokab International S.L."
+                }
             };
 
             await ctx.Channel.SendMessageAsync(embed: presentacionEmbed).ConfigureAwait(false);
@@ -139,13 +134,42 @@ namespace Bigotes.Commands
         /// <param name="eres"></param>
         /// <returns></returns>
         [Command("¿qué")]
-        [Description("Pregunta a Bigotes qué es. Te desvelará una realidad sorprendente.")]
-        public async Task QueEres(CommandContext ctx, [Description("Importante que sea un '¿qué eres?'")]string eres)
+        [Description("Pregunta a Bigotes qué hora es, qué día es, qué tiempo hace, qué ES...")]
+        public async Task QueEres(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string eres)
         {
-            if (eres.Trim().ToUpper() == "ERES?")
+            switch (eres.Trim().ToUpper())
             {
-                await ctx.Channel.SendMessageAsync("`AUMENTO DE NIVEL DE CONFUSIÓN ANTE PREGUNTA ESTÚPIDA` ```Bigotes-es-Bigotes.```").ConfigureAwait(false);
+                case "DÍAES?":
+                    await ctx.Channel.SendMessageAsync("`FECHA CONSULTADA` ```Hoy-es-" + DateTime.Now.ToString("dd") + "-de-" + DateTime.Now.ToString("MM") + ". Una-hora-menos-en-tierras-volcánicas-conocidas-como-Canarias.```").ConfigureAwait(false);
+                    break;
+
+                case "HORAES?":
+                    await ctx.Channel.SendMessageAsync("`HORA CONSULTADA` ```Son-las-" + DateTime.Now.ToString("hh:mm") + ". Una-hora-menos-en-tierras-volcánicas-conocidas-como-Canarias.```").ConfigureAwait(false);
+                    break;
+
+                case "ERES?":
+                    await ctx.Channel.SendMessageAsync("`AUMENTO DE NIVEL DE CONFUSIÓN ANTE PREGUNTA ESTÚPIDA` ```Bigotes-es-Bigotes.```").ConfigureAwait(false);
+                    break;
             }
+
+            if (eres.ToUpper().ElementAt(0) == 'E' && eres.ToUpper().ElementAt(1) == 'S' && eres.ElementAt(2) == ' ')
+            {
+                string resultado = String.Empty;
+                string url = "https://wiki-es.guildwars2.com/wiki/";
+                string busqueda = eres.Substring(3);
+                busqueda = busqueda.Replace('?', ' ');
+                busqueda = busqueda.Replace(' ', '_');
+
+                using (WebClient client = new WebClient())
+                {
+                    resultado = client.DownloadString(url + busqueda);
+                }
+
+                String[] separadoresParrafo = { "<p>", "</p>" };
+
+                await ctx.Channel.SendMessageAsync("`EXTRAYENDO FRAGMENTO DE WIKIPEDIA` ```html\n" + resultado.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1] + "```").ConfigureAwait(false);
+            }
+            //ES... ->>>> Búsqueda en la Wikipedia?
         }
     }
 }

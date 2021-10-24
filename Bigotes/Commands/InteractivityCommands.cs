@@ -20,9 +20,11 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("roles")]
-        [Description("Comando para activar la escucha de roles. Aún en proceso.")]
-        public async Task Gestion(CommandContext ctx)
+        [Description("Comando para activar la escucha de roles.")]
+        public async Task GestionRoles(CommandContext ctx)
         {
+            await ctx.Channel.SendMessageAsync("`[ROLES PREPARADOS]` ```Roles-preparados. A-continuación, escribir-el-mensaje-sobre-la-misma-gestión-de-roles:```").ConfigureAwait(false);
+
             var interactivity = ctx.Client.GetInteractivity();
 
             var message = await interactivity.WaitForReactionAsync(x => x.Channel.Name == "⚙-roles").ConfigureAwait(false);
