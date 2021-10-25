@@ -98,6 +98,7 @@ namespace Bigotes.Commands
 
             string titulo = "¡SALUDOS!";
 
+            #region Descripción
             List<string> descripcion = new List<string>();
             descripcion.Add("Mi-nombre-es-Bigotes.-Originalmente-fui-diseñado-como-golem-por-la-fantástica-Yuubei.");
             descripcion.Add("Fui-provisto-de-múltiples-utilidades-tales-como-detección-de-anomalías-de-energía-provenientes-de-posibles-"
@@ -111,7 +112,9 @@ namespace Bigotes.Commands
                 + "**[RECUPERADO FRAGMENTO DE MEMORIA, GRITO FEMENINO GRABADO: '¡Reacciona, puto cacharro!']**-siento-que-mi-nivel-de-efectividad-"
                 + "no-pueda-ser-igual-a-mi-versión-golem-programada-por-la-fantástica-Yuubei.");
             descripcion.Add("**[CARGANDO RECOMENDACIÓN FINAL]**-Espero-cumplir-con-mi-propósito-y-recomiendo-tomar-precauciones-con-las-galletas.");
+            #endregion
 
+            #region Creación de Embed
             var presentacionEmbed = new DiscordEmbedBuilder
             {
                 Title = titulo,
@@ -127,6 +130,7 @@ namespace Bigotes.Commands
                     Url = Constantes.ICON_BIGOTES
                 }
             };
+            #endregion
 
             await ctx.Channel.SendMessageAsync(embed: presentacionEmbed).ConfigureAwait(false);
         }
