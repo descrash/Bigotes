@@ -143,32 +143,38 @@ namespace Bigotes.Commands
         /// <returns></returns>
         [Command("¿qué")]
         [Description("Pregunta a Bigotes qué hora es, qué día es (en calendario Mouveliano, es decir, del GW2), qué tiempo hace, qué ES 'término' (p.ej.: '¿qué es quaggan?')")]
-        public async Task Que(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string eres)
+        public async Task Que(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string pregunta)
         {
-            switch (eres.Trim().ToUpper())
+            switch (pregunta.Replace("?", String.Empty).Trim().ToUpper())
             {
-                case "DÍA ES?":
+                case "DÍA ES":
                     string fecha = Consultas.ConversionCalendario(DateTime.Today);
                     await ctx.Channel.SendMessageAsync("`FECHA CONSULTADA` ```Hoy-es-" + fecha.Replace(' ', '-') + ".```").ConfigureAwait(false);
                     break;
 
-                case "HORA ES?":
+                case "HORA ES":
                     await ctx.Channel.SendMessageAsync("`HORA CONSULTADA` ```Son-las-" + DateTime.Now.ToString("hh:mm") + ". Una-hora-menos-en-el-Anillo-de-Fuego.```").ConfigureAwait(false);
                     break;
 
-                case "ERES?":
+                case "ERES":
                     await ctx.Channel.SendMessageAsync("`AUMENTO DE NIVEL DE CONFUSIÓN ANTE PREGUNTA ESTÚPIDA` ```Bigotes-es-Bigotes.```").ConfigureAwait(false);
                     break;
 
-                case "TIEMPO HACE?":
+                case "TIEMPO HACE":
                     await ctx.Channel.SendMessageAsync("`CONEXIÓN CON SENSOR METEREOLÓGICO FALLIDA` ```Recomendable-asomar-la-cabeza-por-la-ventana.```").ConfigureAwait(false);
                     break;
             }
 
-            if (eres.Substring(0, 3) == "es ")
+            if (pregunta.Substring(0, 3) == "es ")
             {
-                await ctx.Channel.SendMessageAsync(Consultas.QueEs(eres));
+                await ctx.Channel.SendMessageAsync(Consultas.QueEs(pregunta));
             }
+        }
+
+        [Command("qué")]
+        public async Task QueSinInterrogante(CommandContext ctx, [RemainingText]string pregunta)
+        {
+            await Que(ctx, pregunta);
         }
 
         /// <summary>
@@ -177,9 +183,9 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <param name="es"></param>
         /// <returns></returns>
-        public async Task Quien(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string es)
+        public async Task Quien(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string pj)
         {
-
+            await ctx.Channel.SendMessageAsync("OPCIÓN NO IMPLEMENTADA").ConfigureAwait(false);
         }
     }
 }

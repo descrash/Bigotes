@@ -13,14 +13,14 @@ namespace Bigotes.Util
         /// </summary>
         /// <param name="eres">Nombre a consultar</param>
         /// <returns></returns>
-        public static string QueEs(string eres)
+        public static string QueEs(string es)
         {
             #region Propiedades
             string answer = "`EXTRAYENDO FRAGMENTO DE LA BASE DE DATOS DE RATA SUM` ";
             string resultado = String.Empty;
             string parrafoFinal = String.Empty;
             string url = Constantes.WIKI_GW2;
-            string busqueda = eres.Substring(3);
+            string busqueda = es.Substring(3);
             #endregion
 
             try
