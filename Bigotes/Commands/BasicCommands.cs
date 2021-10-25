@@ -132,50 +132,50 @@ namespace Bigotes.Commands
         }
 
         /// <summary>
-        /// Comando para preguntar a Bigotes qué es. Te dirá una realidad sorprendente.
+        /// Comando para preguntar a Bigotes qué es.
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="eres"></param>
         /// <returns></returns>
         [Command("¿qué")]
-        [Description("Pregunta a Bigotes qué hora es, qué día es, qué tiempo hace, qué ES...")]
-        public async Task QueEres(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string eres)
+        [Description("Pregunta a Bigotes qué hora es, qué día es (en calendario Mouveliano, es decir, del GW2), qué tiempo hace, qué ES 'término' (p.ej.: '¿qué es quaggan?')")]
+        public async Task Que(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string eres)
         {
             switch (eres.Trim().ToUpper())
             {
-                case "DÍAES?":
-                    await ctx.Channel.SendMessageAsync("`FECHA CONSULTADA` ```Hoy-es-" + DateTime.Now.ToString("dd") + "-de-" + DateTime.Now.ToString("MM") + ". Una-hora-menos-en-tierras-volcánicas-conocidas-como-Canarias.```").ConfigureAwait(false);
+                case "DÍA ES?":
+                    string fecha = Consultas.ConversionCalendario(DateTime.Today);
+                    await ctx.Channel.SendMessageAsync("`FECHA CONSULTADA` ```Hoy-es-" + fecha.Replace(' ', '-') + ".```").ConfigureAwait(false);
                     break;
 
-                case "HORAES?":
-                    await ctx.Channel.SendMessageAsync("`HORA CONSULTADA` ```Son-las-" + DateTime.Now.ToString("hh:mm") + ". Una-hora-menos-en-tierras-volcánicas-conocidas-como-Canarias.```").ConfigureAwait(false);
+                case "HORA ES?":
+                    await ctx.Channel.SendMessageAsync("`HORA CONSULTADA` ```Son-las-" + DateTime.Now.ToString("hh:mm") + ". Una-hora-menos-en-el-Anillo-de-Fuego.```").ConfigureAwait(false);
                     break;
 
                 case "ERES?":
                     await ctx.Channel.SendMessageAsync("`AUMENTO DE NIVEL DE CONFUSIÓN ANTE PREGUNTA ESTÚPIDA` ```Bigotes-es-Bigotes.```").ConfigureAwait(false);
                     break;
+
+                case "TIEMPO HACE?":
+                    await ctx.Channel.SendMessageAsync("`CONEXIÓN CON SENSOR METEREOLÓGICO FALLIDA` ```Recomendable-asomar-la-cabeza-por-la-ventana.```").ConfigureAwait(false);
+                    break;
             }
 
-            if (eres.ToUpper().ElementAt(0) == 'E' && eres.ToUpper().ElementAt(1) == 'S' && eres.ElementAt(2) == ' ')
+            if (eres.Substring(0, 3) == "es ")
             {
-                string resultado = String.Empty;
-                string parrafoFinal = String.Empty;
-                string url = "https://wiki-es.guildwars2.com/wiki/";
-                string busqueda = eres.Substring(3);
-                busqueda = busqueda.Replace("?", String.Empty);
-                busqueda = busqueda.Replace(' ', '_');
-
-                using (WebClient client = new WebClient())
-                {
-                    resultado = client.DownloadString(url + busqueda);
-                }
-
-                String[] separadoresParrafo = { "<p>", "</p>" };
-
-                await ctx.Channel.SendMessageAsync("`EXTRAYENDO FRAGMENTO DE LA BASE DE DATOS DE RATA SUM` ```html\n"
-                    + Regex.Replace(resultado.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1], "<.*?>", String.Empty)
-                    + "``` Fuente: " + url + busqueda).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync(Consultas.QueEs(eres));
             }
+        }
+
+        /// <summary>
+        /// Comando para preguntar a Bigotes QUIÉN ES alguien
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="es"></param>
+        /// <returns></returns>
+        public async Task Quien(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string es)
+        {
+
         }
     }
 }
