@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
@@ -26,6 +27,7 @@ namespace Bigotes.Commands
             #region ATRIBUTOS ENCUESTA
             TimeSpan duration = new TimeSpan();
             DiscordMember author = ctx.Member;
+            DiscordChannel embedChannel = ctx.Channel;
             string description = String.Empty;
             string numOptions = "0";
             string urlEncuesta = String.Empty;
@@ -69,16 +71,29 @@ namespace Bigotes.Commands
             #endregion
 
             #region Recogida y gestión del canal en el que realizar la encuesta
-            //await ctx.Channel.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Detallar-canal-de-encuesta:```").ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Detallar-nombre-de-canal-de-encuesta.-Libertad-de-tomar-canal-actual-en-caso-de-no-existir-petición.```").ConfigureAwait(false);
 
-            //string channelName = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
-            
-            //List<DiscordChannel> channels = 
+            string channelName = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
 
+            List<DiscordGuild> guilds = ctx.Client.Guilds.Values.ToList<DiscordGuild>();
+
+            foreach (var guild in guilds)
+            {
+                foreach (var channel in guild.Channels.Values)
+                {
+                    String[] tagsID = { "#", "<", ">" };
+
+                    //Comparamos nombre si se ha puesto únicamente el nombre ("general") o el ID en caso de haber puesto el tag entero ("#general")
+                    if (channel.Name == channelName.Trim() || channel.Id.ToString() == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                    {
+                        embedChannel = channel;
+                    }
+                }
+            }
             #endregion
 
             #region Recogida y gestión de la descripción
-            await ctx.Channel.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Se-precisa-texto-descriptivo:```").ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync("`[BUSCANDO CANAL]` ```Canal-de encuesta-seleccionado:-" + embedChannel.Name + ".``` ```Se-precisa-texto-descriptivo:```").ConfigureAwait(false);
 
             description = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
             #endregion
@@ -121,8 +136,8 @@ namespace Bigotes.Commands
                 Description = description,
                 Color = DiscordColor.Blue
             };
-
-            var pollMessage = await ctx.Channel.SendMessageAsync(embed: pollEmbed).ConfigureAwait(false);
+            
+            var pollMessage = await embedChannel.SendMessageAsync(embed: pollEmbed).ConfigureAwait(false);
 
             foreach (var option in emojiOptions)
             {
