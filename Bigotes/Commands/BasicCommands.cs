@@ -24,10 +24,10 @@ namespace Bigotes.Commands
         [Description("Saluda con un tono u otro dependiendo de su cordialidad.")]
         public async Task Greetings(CommandContext ctx)
         {
-            string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Properties.cordialidad + "%]` ";
+            string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Utiles.cordialidad + "%]` ";
 
             #region Saludos en función de cordialidad
-            switch (Properties.cordialidad)
+            switch (Utiles.cordialidad)
             {
                 case 0:
                     await ctx.Channel.SendMessageAsync(lvlCordialidad + "```Así-te-atragantes-con-sustancias-orgánicas-cuya-fecha-de-expiración-ha-concluido-hace-una-considerable-cantidad-de-tiempo.```").ConfigureAwait(false);
@@ -75,11 +75,11 @@ namespace Bigotes.Commands
             switch (propiedad)
             {
                 case "cordialidad":
-                    await ctx.Channel.SendMessageAsync("```Orden-recibida.-Cordialidad-al-" + Properties.cordialidad + "%-¿A-qué-nivel-debo-ajustarla?```").ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync("```Orden-recibida.-Cordialidad-al-" + Utiles.cordialidad + "%-¿A-qué-nivel-debo-ajustarla?```").ConfigureAwait(false);
 
                     var porcentaje = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel).ConfigureAwait(false);
 
-                    string msg = Properties.AjustarCordialidad(porcentaje.Result.Content);
+                    string msg = Utiles.AjustarCordialidad(porcentaje.Result.Content);
 
                     await ctx.Channel.SendMessageAsync(msg);
 
@@ -162,6 +162,10 @@ namespace Bigotes.Commands
 
                 case "TIEMPO HACE":
                     await ctx.Channel.SendMessageAsync("`CONEXIÓN CON SENSOR METEREOLÓGICO FALLIDA` ```Recomendable-asomar-la-cabeza-por-la-ventana.```").ConfigureAwait(false);
+                    break;
+
+                default:
+                    await ctx.Channel.SendMessageAsync("`ERROR` ```Opción-no-encontrada.```").ConfigureAwait(false);
                     break;
             }
 

@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -94,12 +97,40 @@ namespace Bigotes.Util
 
                 resultado = dia + " " + mes + " de " + año;
             }
-            catch
+            catch(Exception ex)
             {
-                resultado = "ERROR";
+                resultado = "`[ERROR: " + ex.Message.ToUpper() + "]`";
             }
 
             return resultado;
+        }
+
+        /// <summary>
+        /// Método para obtener el canal por el nombre
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static DiscordChannel GetChannel(CommandContext ctx, string channelName)
+        {
+            DiscordChannel channel = null;
+
+            List<DiscordGuild> guilds = ctx.Client.Guilds.Values.ToList<DiscordGuild>();
+
+            foreach (var guild in guilds)
+            {
+                foreach (var _channel in guild.Channels.Values)
+                {
+                    String[] tagsID = { "#", "<", ">" };
+
+                    //Se compara nombre si se ha puesto únicamente el nombre ("general") o el ID en caso de haber puesto el tag entero ("#general")
+                    if (_channel.Name == channelName.Trim() || channel.Id.ToString() == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                    {
+                        channel = _channel;
+                    }
+                }
+            }
+
+            return channel;
         }
     }
 }

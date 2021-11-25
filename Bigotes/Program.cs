@@ -8,7 +8,7 @@ namespace Bigotes
         static void Main(string[] args)
         {
             #region Ajustes de propiedades iniciales
-            Properties.cordialidad = 50;
+            Utiles.cordialidad = 50;
             #endregion
 
             Bot bot = new Bot();

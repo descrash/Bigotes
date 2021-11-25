@@ -100,7 +100,8 @@ namespace Bigotes
             Commands.RegisterCommands<BasicCommands>();
             Commands.RegisterCommands<InteractivityCommands>();
             Commands.RegisterCommands<DiceCommands>();
-            Commands.RegisterCommands<PollCommands>();
+            Commands.RegisterCommands<CreationCommands>();
+            Commands.RegisterCommands<MusicCommands>();
             #endregion
 
             #endregion

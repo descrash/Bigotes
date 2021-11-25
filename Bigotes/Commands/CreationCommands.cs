@@ -1,5 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
@@ -12,17 +11,43 @@ using System.Threading.Tasks;
 
 namespace Bigotes.Commands
 {
-    public class PollCommands : BaseCommandModule
+    public class CreationCommands : BaseCommandModule
     {
         /// <summary>
-        /// Comando para la creación de una encuesta
+        /// Método para la creación de distintas utilidades
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="titulo">Título de la encuesta</param>
+        /// <param name="peticion"></param>
         /// <returns></returns>
-        [Command("encuesta")]
-        [Description("Comando para realizar una encuesta nueva introduciendo titulo.")]
-        public async Task Poll(CommandContext ctx, [Description("Título de la encuesta.")][RemainingText]string titulo)
+        [Command("crear")]
+        public async Task Create(CommandContext ctx, [RemainingText]string peticion)
+        {
+            switch (peticion.Trim().ToUpper())
+            {
+                case "ENCUESTA":
+                    await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```¿Cómo-desea-titular-la-encuesta?```").ConfigureAwait(false);
+                    var interactivity = ctx.Client.GetInteractivity();
+                    var titulo = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+                    await Poll(ctx, titulo.Result.Content);
+                    break;
+
+                case "FICHA":
+
+                    break;
+
+                case "EVENTO":
+
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Método para la realización de encuesta
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="titulo"></param>
+        /// <returns></returns>
+        public async Task Poll(CommandContext ctx, string titulo)
         {
             #region ATRIBUTOS ENCUESTA
             TimeSpan duration = new TimeSpan();
@@ -75,21 +100,7 @@ namespace Bigotes.Commands
 
             string channelName = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result.Content;
 
-            List<DiscordGuild> guilds = ctx.Client.Guilds.Values.ToList<DiscordGuild>();
-
-            foreach (var guild in guilds)
-            {
-                foreach (var channel in guild.Channels.Values)
-                {
-                    String[] tagsID = { "#", "<", ">" };
-
-                    //Comparamos nombre si se ha puesto únicamente el nombre ("general") o el ID en caso de haber puesto el tag entero ("#general")
-                    if (channel.Name == channelName.Trim() || channel.Id.ToString() == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
-                    {
-                        embedChannel = channel;
-                    }
-                }
-            }
+            embedChannel = Util.Consultas.GetChannel(ctx, channelName);
             #endregion
 
             #region Recogida y gestión de la descripción
@@ -112,7 +123,7 @@ namespace Bigotes.Commands
             #region Obtención de emojis para las opciones (reacciones)
             var emojiMSG = await ctx.Channel.SendMessageAsync("`[NÚMERO AJUSTADO]` ```Necesarias-reacciones-a-este-mensaje-con-los-emojis-utilizados-en-cada-opción.```");
 
-            while(emojiOptions.Count < Int32.Parse(numOptions))
+            while (emojiOptions.Count < Int32.Parse(numOptions))
             {
                 var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == emojiMSG && x.User == author).ConfigureAwait(false);
 
@@ -136,7 +147,7 @@ namespace Bigotes.Commands
                 Description = description,
                 Color = DiscordColor.Blue
             };
-            
+
             var pollMessage = await embedChannel.SendMessageAsync(embed: pollEmbed).ConfigureAwait(false);
 
             foreach (var option in emojiOptions)
@@ -152,7 +163,7 @@ namespace Bigotes.Commands
             var msgFinal = "`ENCUESTA " + titulo + " FINALIZADA` ```Resultados:```";
 
             await pollMessage.RespondAsync(msgFinal + string.Join("\n", results));
-            
+
             //await ctx.Channel.SendMessageAsync(string.Join("\n", results)).ConfigureAwait(false);
             #endregion
         }

@@ -4,16 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Bigotes.Util
 {
-    public static class Properties
+    public static class Utiles
     {
+        #region Propiedades
         /// <summary>
         /// Índice de cordialidad para el saludo
         /// </summary>
         public static int cordialidad;
+        #endregion
 
+        #region Métodos
         /// <summary>
         /// Método estático para ajustar la cordialidad del bot
         /// </summary>
@@ -33,7 +37,7 @@ namespace Bigotes.Util
                 {
                     int nivel = Int32.Parse(porcentaje.Trim().Split('%')[0]);
 
-                    Properties.cordialidad = nivel;
+                    Utiles.cordialidad = nivel;
 
                     msg = "`[CARGANDO MENSAJE DE CONFIRMACIÓN]` ```Ajustada-cordialidad-al-" + nivel + "%.```";
                 }
@@ -45,5 +49,6 @@ namespace Bigotes.Util
 
             return msg;
         }
+        #endregion
     }
 }
