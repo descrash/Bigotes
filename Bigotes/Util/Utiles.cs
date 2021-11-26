@@ -15,6 +15,34 @@ namespace Bigotes.Util
         /// Índice de cordialidad para el saludo
         /// </summary>
         public static int cordialidad;
+
+        /// <summary>
+        /// Enumerado para elegir género de personaje en creación de ficha
+        /// </summary>
+        public enum Genero
+        {
+            MASCULINO,
+            FEMENINO,
+            NOBINARIO
+        }
+
+        /// <summary>
+        /// Enumerado para elegir raza de personaje en creación de ficha
+        /// </summary>
+        public enum Raza
+        {
+            HUMANO,
+            CHARR,
+            NORN,
+            ASURA,
+            SYLVARI,
+            QUAGGAN,
+            TENGU,
+            DRAGA,
+            KODAN,
+            GATO,
+            PERRO
+        }
         #endregion
 
         #region Métodos

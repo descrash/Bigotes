@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bigotes.Util;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,26 +10,9 @@ namespace Bigotes.Clases
         #region Datos básicos
         public string nombre_completo { get; set; }
         public string apellidos { get; set; }
-        public enum genero
-        {
-            MASCULINO,
-            FEMENINO,
-            NOBINARIO
-        }
-        public int edad { get; set; }
-        public enum raza
-        {
-            HUMANO,
-            CHAR,
-            NORN,
-            ASURA,
-            SYLVARI,
-            TENGU,
-            DRAGA,
-            KODAN,
-            GATO,
-            PERRO
-        }
+        public Utiles.Genero genero { get; set; }
+        public int bird_year { get; set; }
+        public Utiles.Raza raza { get; set; }
         public string ocupacion { get; set; }
         #endregion
 
@@ -50,7 +34,7 @@ namespace Bigotes.Clases
         #endregion
 
         #region Historia personal
-        //TODO: O string o un adjunto. Ya veremos.
+        //TODO: O string o un adjunto. Ya veremos. Si es string va a ser largo del copón.
         #endregion
 
         #region Características
