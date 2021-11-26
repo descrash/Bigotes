@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus.Net;
+using DSharpPlus.Lavalink;
 
 namespace Bigotes
 {
@@ -68,6 +70,22 @@ namespace Bigotes
             Client = new DiscordClient(config);
             #endregion
 
+            #region Configuración de Lavalink
+            var endpoint = new ConnectionEndpoint
+            {
+                Hostname = "127.0.0.1",
+                Port = 4767
+            };
+
+            var lavalinkConfig = new LavalinkConfiguration
+            {
+                RestEndpoint = endpoint,
+                SocketEndpoint = endpoint
+            };
+
+            var lavalink = Client.UseLavalink();
+            #endregion
+
             Client.Ready += OnClientReady;
 
             //await ctx.Channel.SendMessageAsync("`[ACTIVADO PROTOCOLO BOT-DE-BIGOTES]` ```Funciones-principales-activadas.-Bot-a-la-escucha.```");
@@ -107,6 +125,7 @@ namespace Bigotes
             #endregion
 
             await Client.ConnectAsync();
+            await lavalink.ConnectAsync(lavalinkConfig);
 
             //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
             await Task.Delay(-1);

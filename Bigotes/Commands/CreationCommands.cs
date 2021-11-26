@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using System;
 using System.Collections.Generic;
@@ -22,21 +23,24 @@ namespace Bigotes.Commands
         [Command("crear")]
         public async Task Create(CommandContext ctx, [RemainingText]string peticion)
         {
+            var interactivity = ctx.Client.GetInteractivity();
+
             switch (peticion.Trim().ToUpper())
             {
                 case "ENCUESTA":
-                    await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```¿Cómo-desea-titular-la-encuesta?```").ConfigureAwait(false);
-                    var interactivity = ctx.Client.GetInteractivity();
+                    await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Título-de-encuesta-requerido.```").ConfigureAwait(false);
                     var titulo = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
                     await Poll(ctx, titulo.Result.Content);
                     break;
 
                 case "FICHA":
-
+                    await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ````De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso.```").ConfigureAwait(false);
+                    var nombre = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+                    await Ficha(ctx);
                     break;
 
                 case "EVENTO":
-
+                    await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```¿Cómo-desea-titular-la-encuesta?```").ConfigureAwait(false);
                     break;
             }
         }
@@ -166,6 +170,17 @@ namespace Bigotes.Commands
 
             //await ctx.Channel.SendMessageAsync(string.Join("\n", results)).ConfigureAwait(false);
             #endregion
+        }
+    
+        /// <summary>
+        /// Método para la realización de una ficha de personaje
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="nombre"></param>
+        /// <returns></returns>
+        public async Task Ficha(CommandContext ctx)
+        {
+            
         }
     }
 }
