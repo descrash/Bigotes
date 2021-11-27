@@ -34,7 +34,7 @@ namespace Bigotes.Clases
         #endregion
 
         #region Historia personal
-        //TODO: O string o un adjunto. Ya veremos. Si es string va a ser largo del copón.
+        public string historia_personal { get; set; }
         #endregion
 
         #region Características
@@ -44,6 +44,13 @@ namespace Bigotes.Clases
         public int CARISMA { get; set; }
         public int PERCEPCION { get; set; }
         public int MAGIA { get; set; }
+        public int TOTALES
+        {
+            get
+            {
+                return FUERZA + DESTREZA + INTELIGENCIA + CARISMA + PERCEPCION + MAGIA;
+            }
+        }
         #endregion
     }
 }

@@ -326,24 +326,74 @@ namespace Bigotes.Commands
             #endregion
 
             #region Disgustos
-
+            await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN PSICOLÓGICA GUARDADA]` ```15: Disgustos.```").ConfigureAwait(false);
+            nuevaFicha.disgustos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
             #endregion
 
             #region Habilidades
-
+            await ctx.Channel.SendMessageAsync("`[DISGUSTOS GUARDADOS]` ```16: Habilidades.```").ConfigureAwait(false);
+            nuevaFicha.habilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
             #endregion
 
             #region Debilidades
-
+            await ctx.Channel.SendMessageAsync("`[HABILIDADES GUARDADAS]` ```17: Debilidades.```").ConfigureAwait(false);
+            nuevaFicha.debilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
             #endregion
             #endregion
 
             #region HISTORIA PERSONAL
-            //TODO: Aún no se me ha ocurrido qué poner aquí
+            await ctx.Channel.SendMessageAsync("`[DEBILIDADES GUARDADAS]` ```Insertar-a-continuación-historia-personal. Puede-ser-texto, un-enlace-a-documento-o-dejarlo-en-blanco.```").ConfigureAwait(false);
+            nuevaFicha.historia_personal = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
             #endregion
 
             #region CARACTERÍSTICAS
+            await ctx.Channel.SendMessageAsync("`[HISTORIA GUARDADA]` ```Ahora-pasaremos-a-las-características.```").ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync("`[CARGANDO INSTRUCCIONES]` ```Primero, se-contarán-los-puntos-por-características. Éstas-son-FUERZA :muscle:, DESTREZA :juggler:, INTELIGENCIA :brain:, CARISMA :dancer:, PERCEPCIÓN :eye:-y-MAGIA :magic_wand:. Los-puntos-máximos-"
+                + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-MAGIA, donde-el-máximo-serán-3.```").ConfigureAwait(false);
+            var caracteristicasMSG = await ctx.Channel.SendMessageAsync("`[MENSAJE DE INTERACCIÓN]` ```Presionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Al-terminar, pulsar-:white_check_mark:. En-caso-de-querer-reiniciar, pulsar :x:.```").ConfigureAwait(false);
+            
+            //TODO: Añadir los iconos correspondientes
+            
+            bool finished = false;
+            while (!finished)
+            {
+                var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false);
+                string[] msgError = { "", "", "", "", "", "", "" };
+                
+                if (nuevaFicha.TOTALES == 10)
+                {
+                    msgError[msgError.Count() - 1] = "Total-de-puntos-conseguido.";
+                }
 
+                switch (reactionResult.Result.Emoji)
+                {
+                    case ":muscle:":
+                        if (nuevaFicha.FUERZA < 4)
+                        {
+                            nuevaFicha.FUERZA++;
+                        }
+                        else
+                        {
+                            msgError[0] = "";
+                        }
+                        break;
+                    case ":juggler:":
+                        break;
+                    case ":brain:":
+                        break;
+                    case ":dancer:":
+                        break;
+                    case ":eye:":
+                        break;
+                    case ":magic_wand:":
+                        break;
+                    case ":x:":
+                        break;
+                    case ":white_check_mark:":
+                        finished = true;
+                        break;
+                }
+            }
             #endregion
         }
     }

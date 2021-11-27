@@ -27,13 +27,14 @@ namespace Bigotes.Commands
 
             try
             {
-                if (lava == null) throw new Exception("Conexión-a-lavalink-no-encontrada.");
+                //Se conectará al canal de voz en el que se encuentra el usuario
+                await Join(ctx, lava, ctx.Member.VoiceState.Channel);
 
                 var node = lava.ConnectedNodes.Values.First();
 
                 var connection = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 
-                if (connection == null) throw new Exception("Conexión-a-nodos-no-encontrada.");
+                if (connection == null) throw new Exception("Conexión-a-servidor-no-encontrada.");
                 
                 var loadResult = await node.Rest.GetTracksAsync(url);
 
@@ -48,19 +49,16 @@ namespace Bigotes.Commands
             }
             catch (Exception ex)
             {
-                await ctx.RespondAsync("`ERROR` ```Recogiendo-mensaje-de-error:-" + ex.Message + "```");
+                await ctx.RespondAsync("`ERROR` ```Recogiendo-mensaje-de-error:-" + ex.Message.Replace(' ', '-') + "```");
             }
         }
 
-        [Command]
-        public async Task Join(CommandContext ctx, DiscordChannel channel)
+        public async Task Join(CommandContext ctx, LavalinkExtension lava, DiscordChannel channel)
         {
-            var lava = ctx.Client.GetLavalink();
-
             try
             {
                 if (lava == null) throw new Exception("Conexión-a-lavalink-no-encontrada.");
-                if (!lava.ConnectedNodes.Any()) throw new Exception("Conexión-a-nodos-no-encontrada.");
+                if (!lava.ConnectedNodes.Any()) throw new Exception("No-encontrados-nodos-conectados.");
 
                 var node = lava.ConnectedNodes.Values.First();
 
