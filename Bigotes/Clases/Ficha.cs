@@ -52,5 +52,65 @@ namespace Bigotes.Clases
             }
         }
         #endregion
+
+        #region MOSTRAR FICHA
+        public StringBuilder Mostrar()
+        {
+            StringBuilder ficha = new StringBuilder();
+
+            try
+            {
+                #region DATOS BÁSICOS
+                ficha.Append("**DATOS BÁSICOS**\n");
+                ficha.Append($"Nombre: *{nombre_completo}*\n");
+                ficha.Append($"Apellidos: *{apellidos}*\n");
+                ficha.Append($"Género: *{genero.ToString()}*\n");
+                ficha.Append($"Año de nacimiento: *{bird_year}*\n");
+                ficha.Append($"Raza: *{raza.ToString()}*\n");
+                ficha.Append($"Ocupación: *{ocupacion}*\n\n");
+                #endregion
+
+                #region DATOS FÍSICOS
+                ficha.Append("**DATOS FÍSICOS**\n");
+                ficha.Append($"Descripción física: *{descripcion_fisica}*\n");
+                ficha.Append($"Altura: *{altura} m*\n");
+                ficha.Append($"Peso: *{peso} kg*\n");
+                ficha.Append($"Condición física: *{condicion_fisica}*\n");
+                ficha.Append($"Color de ojos: *{color_ojos}*\n");
+                ficha.Append($"Color del pelo: *{color_pelo}*\n");
+                ficha.Append($"Rasgos característicos: *{rasgos_caracteristicos}*\n\n");
+                #endregion
+
+                #region DATOS PSICOLÓGICOS
+                ficha.Append("**DATOS PSICOLÓGICOS**\n");
+                ficha.Append($"Descripción psicológica: *{descripcion_psicologica}*\n");
+                ficha.Append($"Disgustos: *{disgustos}*\n");
+                ficha.Append($"Habilidades: *{habilidades}*\n");
+                ficha.Append($"Debilidades: *{debilidades}*\n\n");
+                #endregion
+
+                #region HISTORIA PERSONAL
+                ficha.Append("**HISTORIA PERSONAL**\n");
+                ficha.Append($"*{historia_personal}*\n\n");
+                #endregion
+
+                #region CARACTERÍSTICAS
+                ficha.Append("**CARACTERÍSTICAS**\n");
+                ficha.Append($"Fuerza: *{FUERZA}*\n");
+                ficha.Append($"Destreza: *{DESTREZA}*\n");
+                ficha.Append($"Inteligencia: *{INTELIGENCIA}*\n");
+                ficha.Append($"Carisma: *{CARISMA}*\n");
+                ficha.Append($"Percepción: *{PERCEPCION}*\n");
+                ficha.Append($"Magia: *{MAGIA}*\n");
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return ficha;
+        }
+        #endregion
     }
 }

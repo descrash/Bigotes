@@ -36,12 +36,7 @@ namespace Bigotes.Util
             NORN,
             ASURA,
             SYLVARI,
-            QUAGGAN,
-            TENGU,
-            DRAGA,
-            KODAN,
-            GATO,
-            PERRO
+            OTROS
         }
         #endregion
 

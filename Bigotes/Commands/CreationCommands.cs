@@ -35,7 +35,7 @@ namespace Bigotes.Commands
                     break;
 
                 case "FICHA":
-                    await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ````De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ```De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
                     await Ficha(ctx);
                     break;
 
@@ -171,7 +171,7 @@ namespace Bigotes.Commands
             //await ctx.Channel.SendMessageAsync(string.Join("\n", results)).ConfigureAwait(false);
             #endregion
         }
-    
+
         /// <summary>
         /// Método para la realización de una ficha de personaje
         /// </summary>
@@ -180,290 +180,367 @@ namespace Bigotes.Commands
         /// <returns></returns>
         public async Task Ficha(CommandContext ctx)
         {
-            //Esto va a doler
-            Ficha nuevaFicha = new Ficha();
-            DiscordEmoji emoji = null;
-            var interactivity = ctx.Client.GetInteractivity();
-
-            #region DATOS BÁSICOS
-            #region Nombre y apellidos
-            await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
-            nuevaFicha.nombre_completo = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-
-            await ctx.Channel.SendMessageAsync("`[NOMBRE GUARDADO]` ```2: Apellidos.```").ConfigureAwait(false);
-            nuevaFicha.apellidos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Género
-            var generoMSG = await ctx.Channel.SendMessageAsync("`[APELLIDOS GUARDADOS]` ```3: Reaccionar-a-este-mensaje-con-icono-de-género-(masculino :male_sign:, femenino :female_sign:-o-no-binario :transgender_sign:).```").ConfigureAwait(false);
-            while(emoji == null || new[] { ":male_sign:", ":female_sign:", ":transgender_sign:" }.Contains(emoji.Name))
+            try
             {
-                if(emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-tres-iconos: :male_sign: :female_sign: :transgender_sign:.```").ConfigureAwait(false);
-                emoji = (await interactivity.WaitForReactionAsync(x => x.Message == generoMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
-            }
-            switch(emoji.Name)
-            {
-                case ":male_sign:":
+                //Esto va a doler
+                Ficha nuevaFicha = new Ficha();
+                DiscordEmoji emoji = null;
+                var interactivity = ctx.Client.GetInteractivity();
+                DiscordColor color = DiscordColor.Brown;
+
+                #region DATOS BÁSICOS
+                #region Nombre y apellidos
+                await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
+                nuevaFicha.nombre_completo = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+
+                await ctx.Channel.SendMessageAsync("`[NOMBRE GUARDADO]` ```2: Apellidos.```").ConfigureAwait(false);
+                nuevaFicha.apellidos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Género
+                var male_signEmoji = DiscordEmoji.FromName(ctx.Client, ":male_sign:");
+                var female_signEmoji = DiscordEmoji.FromName(ctx.Client, ":female_sign:");
+                var transgender_symbolEmoji = DiscordEmoji.FromName(ctx.Client, ":transgender_symbol:");
+
+                var generoMSG = await ctx.Channel.SendMessageAsync("`[APELLIDOS GUARDADOS]` ```3: Reaccionar-a-este-mensaje-con-icono-de-género:``` Masculino :male_sign:\nFemenino :female_sign:\nNo binario :transgender_symbol:").ConfigureAwait(false);
+
+                await generoMSG.CreateReactionAsync(male_signEmoji).ConfigureAwait(false);
+                await generoMSG.CreateReactionAsync(female_signEmoji).ConfigureAwait(false);
+                await generoMSG.CreateReactionAsync(transgender_symbolEmoji).ConfigureAwait(false);
+
+                while (emoji == null || !(new[] { male_signEmoji, female_signEmoji, transgender_symbolEmoji }.Contains(emoji)))
+                {
+                    if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-tres-iconos:``` :male_sign: :female_sign: :transgender_symbol:").ConfigureAwait(false);
+                    emoji = (await interactivity.WaitForReactionAsync(x => x.Message == generoMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
+                }
+
+                if (emoji == male_signEmoji)
+                {
                     nuevaFicha.genero = Util.Utiles.Genero.MASCULINO;
-                    break;
-                case ":female_sign:":
+                }
+                else if (emoji == female_signEmoji)
+                {
                     nuevaFicha.genero = Util.Utiles.Genero.FEMENINO;
-                    break;
-                case ":transgender_sign:":
+                }
+                else if (emoji == transgender_symbolEmoji)
+                {
                     nuevaFicha.genero = Util.Utiles.Genero.NOBINARIO;
-                    break;
-            }
-            #endregion
+                }
 
-            #region Edad
-            await ctx.Channel.SendMessageAsync("`[GÉNERO GUARDADO]` ```4: Año-de-nacimiento.```").ConfigureAwait(false);
-            int anio;
-            while(!Int32.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out anio))
-            {
-                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
-            }
-            nuevaFicha.bird_year = anio;
-            #endregion
+                emoji = null;
+                #endregion
 
-            #region Raza
-            var raceMSG = await ctx.Channel.SendMessageAsync("`[APELLIDOS GUARDADOS]` ```5: Reaccionar-a-este-mensaje-con-icono-de-raza-(humano :humano:, charr :charr:, norn :norn:, asura :asura:, sylvari :sylvari:, quaggan :OrcaQ:, tengu :eagle:, draga :rat:, kodan :polar_bear:, gato :cat: o perro :dog:).```").ConfigureAwait(false);
-            while (emoji == null || new[] { ":male_sign:", ":female_sign:", ":transgender_sign:" }.Contains(emoji.Name))
-            {
-                if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
-                emoji = (await interactivity.WaitForReactionAsync(x => x.Message == raceMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
-            }
-            switch (emoji.Name)
-            {
-                case ":humano:":
+                #region Edad
+                await ctx.Channel.SendMessageAsync("`[GÉNERO GUARDADO]` ```4: Año-de-nacimiento.```").ConfigureAwait(false);
+                int anio;
+                while (!Int32.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out anio))
+                {
+                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
+                }
+                nuevaFicha.bird_year = anio;
+                #endregion
+
+                #region Raza
+                var humanoEmoji = DiscordEmoji.FromName(ctx.Client, ":humano:");
+                var charrEmoji = DiscordEmoji.FromName(ctx.Client, ":charr:");
+                var nornEmoji = DiscordEmoji.FromName(ctx.Client, ":norn:");
+                var asuraEmoji = DiscordEmoji.FromName(ctx.Client, ":asura:");
+                var sylvariEmoji = DiscordEmoji.FromName(ctx.Client, ":sylvari:");
+                var mundoEmoji = DiscordEmoji.FromName(ctx.Client, ":mundo:");
+
+                var raceMSG = await ctx.Channel.SendMessageAsync("`[APELLIDOS GUARDADOS]` ```5: Reaccionar-a-este-mensaje-con-icono-de-raza: ```Humano " + humanoEmoji + "\nCharr " + charrEmoji + "\nNorn " + nornEmoji + "\nAsura " + asuraEmoji + "\nSylvari " + sylvariEmoji + "\nOtros " + mundoEmoji).ConfigureAwait(false);
+
+                await raceMSG.CreateReactionAsync(humanoEmoji).ConfigureAwait(false);
+                await raceMSG.CreateReactionAsync(charrEmoji).ConfigureAwait(false);
+                await raceMSG.CreateReactionAsync(nornEmoji).ConfigureAwait(false);
+                await raceMSG.CreateReactionAsync(asuraEmoji).ConfigureAwait(false);
+                await raceMSG.CreateReactionAsync(sylvariEmoji).ConfigureAwait(false);
+                await raceMSG.CreateReactionAsync(mundoEmoji).ConfigureAwait(false);
+
+                while (emoji == null || !(new[] { humanoEmoji, charrEmoji, nornEmoji, asuraEmoji, sylvariEmoji, mundoEmoji }.Contains(emoji)))
+                {
+                    if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
+                    emoji = (await interactivity.WaitForReactionAsync(x => x.Message == raceMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
+                }
+
+                if (emoji == humanoEmoji)
+                {
                     nuevaFicha.raza = Util.Utiles.Raza.HUMANO;
-                    break;
-                case ":charr:":
+                    color = DiscordColor.Gold;
+                }
+                else if (emoji == charrEmoji)
+                {
                     nuevaFicha.raza = Util.Utiles.Raza.CHARR;
-                    break;
-                case ":norn:":
+                    color = DiscordColor.DarkRed;
+                }
+                else if (emoji == nornEmoji)
+                {
                     nuevaFicha.raza = Util.Utiles.Raza.NORN;
-                    break;
-                case ":asura:":
+                    color = DiscordColor.Azure;
+                }
+                else if (emoji == asuraEmoji)
+                {
                     nuevaFicha.raza = Util.Utiles.Raza.ASURA;
-                    break;
-                case ":sylvari:":
+                    color = DiscordColor.Purple;
+                }
+                else if (emoji == sylvariEmoji)
+                {
                     nuevaFicha.raza = Util.Utiles.Raza.SYLVARI;
-                    break;
-                case ":OrcaQ:":
-                    nuevaFicha.raza = Util.Utiles.Raza.QUAGGAN;
-                    break;
-                case ":eagle:":
-                    nuevaFicha.raza = Util.Utiles.Raza.TENGU;
-                    break;
-                case ":rat:":
-                    nuevaFicha.raza = Util.Utiles.Raza.DRAGA;
-                    break;
-                case ":polar_bear:":
-                    nuevaFicha.raza = Util.Utiles.Raza.KODAN;
-                    break;
-                case ":cat:":
-                    nuevaFicha.raza = Util.Utiles.Raza.GATO;
-                    break;
-                case ":dog:":
-                    nuevaFicha.raza = Util.Utiles.Raza.PERRO;
-                    break;
-            }
-            #endregion
-
-            #region Ocupación
-            await ctx.Channel.SendMessageAsync("`[RAZA GUARDADA]` ```6: Ocupación-actual.```").ConfigureAwait(false);
-            nuevaFicha.ocupacion = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-            #endregion
-
-            #region DATOS FÍSICOS
-            #region Descripción física
-            await ctx.Channel.SendMessageAsync("`[OCUPACIÓN GUARDADA]` ```Pasando-a-DATOS-FÍSICOS. 7: Descripción-física.```").ConfigureAwait(false);
-            nuevaFicha.descripcion_fisica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Altura y peso
-            await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN FÍSICA GUARDADA]` ```8: Altura-aproximada.```").ConfigureAwait(false);
-            double altura;
-            while (!Double.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out altura))
-            {
-                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
-            }
-            nuevaFicha.altura = altura;
-
-            await ctx.Channel.SendMessageAsync("`[ALTURA GUARDADA]` ```9: Peso-aproximado.```").ConfigureAwait(false);
-            double peso;
-            while (!Double.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out peso))
-            {
-                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
-            }
-            nuevaFicha.peso = peso;
-            #endregion
-
-            #region Condición física
-            await ctx.Channel.SendMessageAsync("`[PESO GUARDADO]` ```10: Condición-física.```").ConfigureAwait(false);
-            nuevaFicha.condicion_fisica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Color de ojos y pelo
-            await ctx.Channel.SendMessageAsync("`[CONDICIÓN FÍSICA GUARDADA]` ```11: Color-de-ojos.```").ConfigureAwait(false);
-            nuevaFicha.color_ojos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-
-            await ctx.Channel.SendMessageAsync("`[COLOR DE OJOS GUARDADO]` ```12: Color-de-pelo.```").ConfigureAwait(false);
-            nuevaFicha.color_pelo = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Rasgos característicos
-            await ctx.Channel.SendMessageAsync("`[COLOR DE PELO GUARDADO]` ```13: Rasgos-característicos.```").ConfigureAwait(false);
-            nuevaFicha.rasgos_caracteristicos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-            #endregion
-
-            #region DATOS PSICOLÓGICOS
-            #region Descripción psicológica
-            await ctx.Channel.SendMessageAsync("`[RASGOS GUARDADOS]` ```Pasando-a-DATOS-PSICOLÓGICOS. 14: Descripción-psicológica.```").ConfigureAwait(false);
-            nuevaFicha.descripcion_psicologica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Disgustos
-            await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN PSICOLÓGICA GUARDADA]` ```15: Disgustos.```").ConfigureAwait(false);
-            nuevaFicha.disgustos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Habilidades
-            await ctx.Channel.SendMessageAsync("`[DISGUSTOS GUARDADOS]` ```16: Habilidades.```").ConfigureAwait(false);
-            nuevaFicha.habilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region Debilidades
-            await ctx.Channel.SendMessageAsync("`[HABILIDADES GUARDADAS]` ```17: Debilidades.```").ConfigureAwait(false);
-            nuevaFicha.debilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-            #endregion
-
-            #region HISTORIA PERSONAL
-            await ctx.Channel.SendMessageAsync("`[DEBILIDADES GUARDADAS]` ```Insertar-a-continuación-historia-personal. Puede-ser-texto, un-enlace-a-documento-o-dejarlo-en-blanco.```").ConfigureAwait(false);
-            nuevaFicha.historia_personal = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-            #endregion
-
-            #region CARACTERÍSTICAS
-            await ctx.Channel.SendMessageAsync("`[HISTORIA GUARDADA]` ```Ahora-pasaremos-a-las-características.```").ConfigureAwait(false);
-
-            await ctx.Channel.SendMessageAsync("`[CARGANDO INSTRUCCIONES]` ```Primero, se-contarán-los-puntos-por-características. Éstas-son-FUERZA :muscle:, DESTREZA :juggler:, INTELIGENCIA :brain:, CARISMA :dancer:, PERCEPCIÓN :eye:-y-MAGIA :magic_wand:. Los-puntos-máximos-"
-                + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-MAGIA, donde-el-máximo-serán-3.``` ```Presionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Para-restar, pulsar-:arrow_down_small:-y-la-característica-concreta. Puede-haber-números-negativos-en-función-"
-                + "de-las-cualidades-del-personaje. Al-terminar, pulsar-:white_check_mark:. En-caso-de-querer-reiniciar, pulsar :x:.```").ConfigureAwait(false);
-
-            var caracteristicasMSG = await ctx.Channel.SendMessageAsync("`MENSAJE DE INTERACCIÓN` `FUERZA: " + nuevaFicha.FUERZA + "``DESTREZA: " + nuevaFicha.DESTREZA + "``INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "``CARISMA: " + nuevaFicha.CARISMA + "``PERCEPCION: " + nuevaFicha.PERCEPCION + "``MAGIA: " + nuevaFicha.MAGIA + "`"
-                + "`TOTAL: " + nuevaFicha.TOTALES + "`").ConfigureAwait(false);
-            
-            //TODO: Añadir los iconos correspondientes
-            
-            bool finished = false;
-            while (!finished)
-            {
-                int addValue = 1;
-                var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false);
-                string[] msgError = { "", "", "", "", "", "", "" };
-                
-                if (nuevaFicha.TOTALES == 10)
+                    color = DiscordColor.DarkGreen;
+                }
+                else if (emoji == mundoEmoji)
                 {
-                    msgError[msgError.Count() - 1] = "Total-de-puntos-alcanzado. Imposible-añadir-más-puntos.";
+                    nuevaFicha.raza = Util.Utiles.Raza.OTROS;
                 }
 
-                if (reactionResult.Result.Emoji.Name == ":arrow_down_small:")
+                emoji = null;
+                #endregion
+
+                #region Ocupación
+                await ctx.Channel.SendMessageAsync("`[RAZA GUARDADA]` ```6: Ocupación-actual.```").ConfigureAwait(false);
+                nuevaFicha.ocupacion = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+                #endregion
+
+                #region DATOS FÍSICOS
+                #region Descripción física
+                await ctx.Channel.SendMessageAsync("`[OCUPACIÓN GUARDADA]` ```Pasando-a-DATOS-FÍSICOS. 7: Descripción-física.```").ConfigureAwait(false);
+                nuevaFicha.descripcion_fisica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Altura y peso
+                await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN FÍSICA GUARDADA]` ```8: Altura-aproximada.```").ConfigureAwait(false);
+                double altura;
+                while (!Double.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out altura))
                 {
-                    reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false);
-                    addValue = -1;
+                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
                 }
+                nuevaFicha.altura = altura;
 
-                switch (reactionResult.Result.Emoji.Name)
+                await ctx.Channel.SendMessageAsync("`[ALTURA GUARDADA]` ```9: Peso-aproximado.```").ConfigureAwait(false);
+                double peso;
+                while (!Double.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out peso))
                 {
-                    case ":muscle:":
-                        if (nuevaFicha.FUERZA < 4)
-                        {
-                            nuevaFicha.FUERZA += addValue;
-                        }
-                        else
-                        {
-                            msgError[0] = "Límite-de-fuerza-alcanzado.";
-                        }
-                        break;
-
-                    case ":juggler:":
-                        if (nuevaFicha.DESTREZA < 4)
-                        {
-                            nuevaFicha.DESTREZA += addValue;
-                        }
-                        else
-                        {
-                            msgError[1] = "Límite-de-destreza-alcanzado.";
-                        }
-                        break;
-
-                    case ":brain:":
-                        if (nuevaFicha.INTELIGENCIA < 4)
-                        {
-                            nuevaFicha.INTELIGENCIA += addValue;
-                        }
-                        else
-                        {
-                            msgError[2] = "Límite-de-inteligencia-alcanzado.";
-                        }
-                        break;
-
-                    case ":dancer:":
-                        if (nuevaFicha.CARISMA < 4)
-                        {
-                            nuevaFicha.CARISMA += addValue;
-                        }
-                        else
-                        {
-                            msgError[3] = "Límite-de-carisma-alcanzado.";
-                        }
-                        break;
-
-                    case ":eye:":
-                        if (nuevaFicha.PERCEPCION < 4)
-                        {
-                            nuevaFicha.PERCEPCION += addValue;
-                        }
-                        else
-                        {
-                            msgError[4] = "Límite-de-percepción-alcanzado.";
-                        }
-                        break;
-
-                    case ":magic_wand:":
-                        if (nuevaFicha.MAGIA < 3)
-                        {
-                            nuevaFicha.MAGIA += addValue;
-                        }
-                        else
-                        {
-                            msgError[5] = "Límite-de-magia-alcanzado.";
-                        }
-                        break;
-
-                    case ":x:":
-                        nuevaFicha.FUERZA = 0;
-                        nuevaFicha.DESTREZA = 0;
-                        nuevaFicha.INTELIGENCIA = 0;
-                        nuevaFicha.CARISMA = 0;
-                        nuevaFicha.PERCEPCION = 0;
-                        nuevaFicha.MAGIA = 0;
-                        break;
-
-                    case ":white_check_mark:":
-                        finished = true;
-                        break;
+                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
                 }
+                nuevaFicha.peso = peso;
+                #endregion
 
-                await caracteristicasMSG.ModifyAsync("`MENSAJE DE INTERACCIÓN` `FUERZA: " + nuevaFicha.FUERZA + "``DESTREZA: " + nuevaFicha.DESTREZA + "``INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "``CARISMA: " + nuevaFicha.CARISMA + "``PERCEPCION: " + nuevaFicha.PERCEPCION + "``MAGIA: " + nuevaFicha.MAGIA + "`"
-                + "`TOTAL: " + nuevaFicha.TOTALES + "`");
+                #region Condición física
+                await ctx.Channel.SendMessageAsync("`[PESO GUARDADO]` ```10: Condición-física.```").ConfigureAwait(false);
+                nuevaFicha.condicion_fisica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Color de ojos y pelo
+                await ctx.Channel.SendMessageAsync("`[CONDICIÓN FÍSICA GUARDADA]` ```11: Color-de-ojos.```").ConfigureAwait(false);
+                nuevaFicha.color_ojos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+
+                await ctx.Channel.SendMessageAsync("`[COLOR DE OJOS GUARDADO]` ```12: Color-de-pelo.```").ConfigureAwait(false);
+                nuevaFicha.color_pelo = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Rasgos característicos
+                await ctx.Channel.SendMessageAsync("`[COLOR DE PELO GUARDADO]` ```13: Rasgos-característicos.```").ConfigureAwait(false);
+                nuevaFicha.rasgos_caracteristicos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+                #endregion
+
+                #region DATOS PSICOLÓGICOS
+                #region Descripción psicológica
+                await ctx.Channel.SendMessageAsync("`[RASGOS GUARDADOS]` ```Pasando-a-DATOS-PSICOLÓGICOS. 14: Descripción-psicológica.```").ConfigureAwait(false);
+                nuevaFicha.descripcion_psicologica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Disgustos
+                await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN PSICOLÓGICA GUARDADA]` ```15: Disgustos.```").ConfigureAwait(false);
+                nuevaFicha.disgustos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Habilidades
+                await ctx.Channel.SendMessageAsync("`[DISGUSTOS GUARDADOS]` ```16: Habilidades.```").ConfigureAwait(false);
+                nuevaFicha.habilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Debilidades
+                await ctx.Channel.SendMessageAsync("`[HABILIDADES GUARDADAS]` ```17: Debilidades.```").ConfigureAwait(false);
+                nuevaFicha.debilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+                #endregion
+
+                #region HISTORIA PERSONAL
+                await ctx.Channel.SendMessageAsync("`[DEBILIDADES GUARDADAS]` ```Insertar-a-continuación-historia-personal. Puede-ser-texto, un-enlace-a-documento-o-dejarlo-en-blanco.```").ConfigureAwait(false);
+                nuevaFicha.historia_personal = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region CARACTERÍSTICAS
+                await ctx.Channel.SendMessageAsync("`[HISTORIA GUARDADA]` ```Ahora-pasaremos-a-las-características.```").ConfigureAwait(false);
+
+                var muscleEmoji = DiscordEmoji.FromName(ctx.Client, ":muscle:");
+                var jugglerEmoji = DiscordEmoji.FromName(ctx.Client, ":juggler:");
+                var brainEmoji = DiscordEmoji.FromName(ctx.Client, ":brain:");
+                var dancerEmoji = DiscordEmoji.FromName(ctx.Client, ":dancer:");
+                var eyeEmoji = DiscordEmoji.FromName(ctx.Client, ":eye:");
+                var magic_wandEmoji = DiscordEmoji.FromName(ctx.Client, ":magic_wand:");
+                var arrow_down_smallEmoji = DiscordEmoji.FromName(ctx.Client, ":arrow_down_small:");
+                var white_check_markEmoji = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
+                var xEmoji = DiscordEmoji.FromName(ctx.Client, ":x:");
+
+                await ctx.Channel.SendMessageAsync("```A-continuación, se-muestran-las-instrucciones:``` Primero, se-contarán-los-puntos-por-características. Éstas-son-**FUERZA** " + muscleEmoji + ", **DESTREZA** " + jugglerEmoji + ", **INTELIGENCIA** " + brainEmoji + ", **CARISMA** " + dancerEmoji + ", **PERCEPCIÓN** " + eyeEmoji + "-y-**MAGIA** " + magic_wandEmoji + ". Los-puntos-máximos-"
+                    + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-**MAGIA**, donde-el-máximo-serán-3.\nPresionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Para-**restar**, pulsar " + arrow_down_smallEmoji + "-y-la-característica-concreta. Puede-haber-números-negativos-en-función-"
+                    + "de-las-cualidades-del-personaje. Al-**terminar**, pulsar " + white_check_markEmoji + ". En-caso-de-querer-**reiniciar**, pulsar " + xEmoji + ".").ConfigureAwait(false);
+
+                var caracteristicasMSG = await ctx.Channel.SendMessageAsync("```CONTADOR:``` :muscle: FUERZA: " + nuevaFicha.FUERZA + "\n:juggler: DESTREZA: " + nuevaFicha.DESTREZA + "\n:brain: INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "\n:dancer: CARISMA: "
+                    + nuevaFicha.CARISMA + "\n:eye: PERCEPCION: " + nuevaFicha.PERCEPCION + "\n:magic_wand: MAGIA: " + nuevaFicha.MAGIA + "\n**TOTAL**: " + nuevaFicha.TOTALES + "").ConfigureAwait(false);
+
+                await caracteristicasMSG.CreateReactionAsync(muscleEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(jugglerEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(brainEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(dancerEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(eyeEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(magic_wandEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(arrow_down_smallEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(white_check_markEmoji).ConfigureAwait(false);
+                await caracteristicasMSG.CreateReactionAsync(xEmoji).ConfigureAwait(false);
+
+                bool finished = false;
+                while (!finished)
+                {
+                    emoji = null;
+
+                    int addValue = 1;
+
+                    while (emoji == null || !(new[] { muscleEmoji, jugglerEmoji, brainEmoji, dancerEmoji, eyeEmoji, magic_wandEmoji, arrow_down_smallEmoji, white_check_markEmoji, xEmoji }.Contains(emoji)))
+                    {
+                        if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
+                        emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
+                    }
+
+                    string[] msgError = { "", "", "", "", "", "", "" };
+
+                    if (nuevaFicha.TOTALES == 10 && !(new[] { arrow_down_smallEmoji, white_check_markEmoji, xEmoji }.Contains(emoji)))
+                    {
+                        msgError[msgError.Count() - 1] = " Total-de-puntos-alcanzado. Imposible-añadir-más-puntos.";
+                    }
+                    else
+                    {
+                        if (emoji == arrow_down_smallEmoji)
+                        {
+                            emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
+                            addValue = -1;
+                        }
+
+                        if (emoji == muscleEmoji)
+                        {
+                            if (nuevaFicha.FUERZA < 4 || addValue == -1)
+                            {
+                                nuevaFicha.FUERZA += addValue;
+                            }
+                            else
+                            {
+                                msgError[0] = " Límite-de-fuerza-alcanzado.";
+                            }
+                        }
+
+                        else if (emoji == jugglerEmoji)
+                        {
+                            if (nuevaFicha.DESTREZA < 4 || addValue == -1)
+                            {
+                                nuevaFicha.DESTREZA += addValue;
+                            }
+                            else
+                            {
+                                msgError[1] = " Límite-de-destreza-alcanzado.";
+                            }
+                        }
+
+                        else if (emoji == brainEmoji)
+                        {
+                            if (nuevaFicha.INTELIGENCIA < 4 || addValue == -1)
+                            {
+                                nuevaFicha.INTELIGENCIA += addValue;
+                            }
+                            else
+                            {
+                                msgError[2] = " Límite-de-inteligencia-alcanzado.";
+                            }
+                        }
+
+                        else if (emoji == dancerEmoji)
+                        {
+                            if (nuevaFicha.CARISMA < 4 || addValue == -1)
+                            {
+                                nuevaFicha.CARISMA += addValue;
+                            }
+                            else
+                            {
+                                msgError[3] = " Límite-de-carisma-alcanzado.";
+                            }
+                        }
+
+                        else if (emoji == eyeEmoji)
+                        {
+                            if (nuevaFicha.PERCEPCION < 4 || addValue == -1)
+                            {
+                                nuevaFicha.PERCEPCION += addValue;
+                            }
+                            else
+                            {
+                                msgError[4] = " Límite-de-percepción-alcanzado.";
+                            }
+                        }
+
+                        else if (emoji == magic_wandEmoji)
+                        {
+                            if (nuevaFicha.MAGIA < 3 || addValue == -1)
+                            {
+                                nuevaFicha.MAGIA += addValue;
+                            }
+                            else
+                            {
+                                msgError[5] = " Límite-de-magia-alcanzado.";
+                            }
+                        }
+
+                        else if (emoji == xEmoji)
+                        {
+                            nuevaFicha.FUERZA = 0;
+                            nuevaFicha.DESTREZA = 0;
+                            nuevaFicha.INTELIGENCIA = 0;
+                            nuevaFicha.CARISMA = 0;
+                            nuevaFicha.PERCEPCION = 0;
+                            nuevaFicha.MAGIA = 0;
+                        }
+
+                        else if (emoji == white_check_markEmoji)
+                        {
+                            finished = true;
+                        }
+                    }
+
+                    await caracteristicasMSG.ModifyAsync("```CONTADOR:``` :muscle: FUERZA: " + nuevaFicha.FUERZA + msgError[0] + "\n:juggler: DESTREZA: " + nuevaFicha.DESTREZA + msgError[1] + "\n:brain: INTELIGENCIA: "
+                        + nuevaFicha.INTELIGENCIA + msgError[2] + "\n:dancer: CARISMA: " + nuevaFicha.CARISMA + msgError[3] + "\n:eye: PERCEPCION: " + nuevaFicha.PERCEPCION + msgError[4] + "\n:magic_wand: MAGIA: "
+                        + nuevaFicha.MAGIA + msgError[5] + "\n**TOTAL**: " + nuevaFicha.TOTALES + msgError[6] + "");
+
+                    await caracteristicasMSG.DeleteReactionAsync(arrow_down_smallEmoji, ctx.User).ConfigureAwait(false);
+                    await caracteristicasMSG.DeleteReactionAsync(emoji, ctx.User).ConfigureAwait(false);
+                }
+                #endregion
+
+                await ctx.Channel.SendMessageAsync("`[CARACTERÍSTICAS TERMINADAS]` ```Mostrando-resultado-final...```").ConfigureAwait(false);
+
+                var embedFicha = new DiscordEmbedBuilder
+                {
+                    Title = nuevaFicha.nombre_completo + " " + nuevaFicha.apellidos,
+                    Description = nuevaFicha.Mostrar().ToString(),
+                    Color = color,
+                };
+
+                await ctx.Channel.SendMessageAsync(embed: embedFicha).ConfigureAwait(false);
             }
-
-            await ctx.Channel.SendMessageAsync("`[PUNTO DE INTERRUPCIÓN DE FICHA]`").ConfigureAwait(false);
-            #endregion
+            catch (Exception ex)
+            {
+                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Mensaje-de-error: " + ex.Message.Replace(' ', '-') + " ```").ConfigureAwait(false);
+            }
         }
     }
 }
