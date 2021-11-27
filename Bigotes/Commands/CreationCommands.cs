@@ -348,52 +348,121 @@ namespace Bigotes.Commands
 
             #region CARACTERÍSTICAS
             await ctx.Channel.SendMessageAsync("`[HISTORIA GUARDADA]` ```Ahora-pasaremos-a-las-características.```").ConfigureAwait(false);
+
             await ctx.Channel.SendMessageAsync("`[CARGANDO INSTRUCCIONES]` ```Primero, se-contarán-los-puntos-por-características. Éstas-son-FUERZA :muscle:, DESTREZA :juggler:, INTELIGENCIA :brain:, CARISMA :dancer:, PERCEPCIÓN :eye:-y-MAGIA :magic_wand:. Los-puntos-máximos-"
-                + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-MAGIA, donde-el-máximo-serán-3.```").ConfigureAwait(false);
-            var caracteristicasMSG = await ctx.Channel.SendMessageAsync("`[MENSAJE DE INTERACCIÓN]` ```Presionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Al-terminar, pulsar-:white_check_mark:. En-caso-de-querer-reiniciar, pulsar :x:.```").ConfigureAwait(false);
+                + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-MAGIA, donde-el-máximo-serán-3.``` ```Presionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Para-restar, pulsar-:arrow_down_small:-y-la-característica-concreta. Puede-haber-números-negativos-en-función-"
+                + "de-las-cualidades-del-personaje. Al-terminar, pulsar-:white_check_mark:. En-caso-de-querer-reiniciar, pulsar :x:.```").ConfigureAwait(false);
+
+            var caracteristicasMSG = await ctx.Channel.SendMessageAsync("`MENSAJE DE INTERACCIÓN` `FUERZA: " + nuevaFicha.FUERZA + "``DESTREZA: " + nuevaFicha.DESTREZA + "``INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "``CARISMA: " + nuevaFicha.CARISMA + "``PERCEPCION: " + nuevaFicha.PERCEPCION + "``MAGIA: " + nuevaFicha.MAGIA + "`"
+                + "`TOTAL: " + nuevaFicha.TOTALES + "`").ConfigureAwait(false);
             
             //TODO: Añadir los iconos correspondientes
             
             bool finished = false;
             while (!finished)
             {
+                int addValue = 1;
                 var reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false);
                 string[] msgError = { "", "", "", "", "", "", "" };
                 
                 if (nuevaFicha.TOTALES == 10)
                 {
-                    msgError[msgError.Count() - 1] = "Total-de-puntos-conseguido.";
+                    msgError[msgError.Count() - 1] = "Total-de-puntos-alcanzado. Imposible-añadir-más-puntos.";
                 }
 
-                switch (reactionResult.Result.Emoji)
+                if (reactionResult.Result.Emoji.Name == ":arrow_down_small:")
+                {
+                    reactionResult = await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false);
+                    addValue = -1;
+                }
+
+                switch (reactionResult.Result.Emoji.Name)
                 {
                     case ":muscle:":
                         if (nuevaFicha.FUERZA < 4)
                         {
-                            nuevaFicha.FUERZA++;
+                            nuevaFicha.FUERZA += addValue;
                         }
                         else
                         {
-                            msgError[0] = "";
+                            msgError[0] = "Límite-de-fuerza-alcanzado.";
                         }
                         break;
+
                     case ":juggler:":
+                        if (nuevaFicha.DESTREZA < 4)
+                        {
+                            nuevaFicha.DESTREZA += addValue;
+                        }
+                        else
+                        {
+                            msgError[1] = "Límite-de-destreza-alcanzado.";
+                        }
                         break;
+
                     case ":brain:":
+                        if (nuevaFicha.INTELIGENCIA < 4)
+                        {
+                            nuevaFicha.INTELIGENCIA += addValue;
+                        }
+                        else
+                        {
+                            msgError[2] = "Límite-de-inteligencia-alcanzado.";
+                        }
                         break;
+
                     case ":dancer:":
+                        if (nuevaFicha.CARISMA < 4)
+                        {
+                            nuevaFicha.CARISMA += addValue;
+                        }
+                        else
+                        {
+                            msgError[3] = "Límite-de-carisma-alcanzado.";
+                        }
                         break;
+
                     case ":eye:":
+                        if (nuevaFicha.PERCEPCION < 4)
+                        {
+                            nuevaFicha.PERCEPCION += addValue;
+                        }
+                        else
+                        {
+                            msgError[4] = "Límite-de-percepción-alcanzado.";
+                        }
                         break;
+
                     case ":magic_wand:":
+                        if (nuevaFicha.MAGIA < 3)
+                        {
+                            nuevaFicha.MAGIA += addValue;
+                        }
+                        else
+                        {
+                            msgError[5] = "Límite-de-magia-alcanzado.";
+                        }
                         break;
+
                     case ":x:":
+                        nuevaFicha.FUERZA = 0;
+                        nuevaFicha.DESTREZA = 0;
+                        nuevaFicha.INTELIGENCIA = 0;
+                        nuevaFicha.CARISMA = 0;
+                        nuevaFicha.PERCEPCION = 0;
+                        nuevaFicha.MAGIA = 0;
                         break;
+
                     case ":white_check_mark:":
                         finished = true;
                         break;
                 }
+
+                await caracteristicasMSG.ModifyAsync("`MENSAJE DE INTERACCIÓN` `FUERZA: " + nuevaFicha.FUERZA + "``DESTREZA: " + nuevaFicha.DESTREZA + "``INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "``CARISMA: " + nuevaFicha.CARISMA + "``PERCEPCION: " + nuevaFicha.PERCEPCION + "``MAGIA: " + nuevaFicha.MAGIA + "`"
+                + "`TOTAL: " + nuevaFicha.TOTALES + "`");
             }
+
+            await ctx.Channel.SendMessageAsync("`[PUNTO DE INTERRUPCIÓN DE FICHA]`").ConfigureAwait(false);
             #endregion
         }
     }
