@@ -51,6 +51,13 @@ namespace Bigotes.Clases
                 return FUERZA + DESTREZA + INTELIGENCIA + CARISMA + PERCEPCION + MAGIA;
             }
         }
+
+        public string descriptorFUERZA { get; set; }
+        public string descriptorDESTREZA { get; set; }
+        public string descriptorINTELIGENCIA { get; set; }
+        public string descriptorCARISMA { get; set; }
+        public string descriptorPERCEPCION { get; set; }
+        public string descriptorMAGIA { get; set; }
         #endregion
 
         #region MOSTRAR FICHA
@@ -96,12 +103,12 @@ namespace Bigotes.Clases
 
                 #region CARACTERÍSTICAS
                 ficha.Append("**CARACTERÍSTICAS**\n");
-                ficha.Append($"Fuerza: *{FUERZA}*\n");
-                ficha.Append($"Destreza: *{DESTREZA}*\n");
-                ficha.Append($"Inteligencia: *{INTELIGENCIA}*\n");
-                ficha.Append($"Carisma: *{CARISMA}*\n");
-                ficha.Append($"Percepción: *{PERCEPCION}*\n");
-                ficha.Append($"Magia: *{MAGIA}*\n");
+                ficha.Append($"Fuerza: *\"{descriptorFUERZA}\" *{FUERZA}**\n");
+                ficha.Append($"Destreza: *\"{descriptorDESTREZA}\" *{DESTREZA}**\n");
+                ficha.Append($"Inteligencia: *\"{descriptorINTELIGENCIA}\" *{INTELIGENCIA}**\n");
+                ficha.Append($"Carisma: *\"{descriptorCARISMA}\" *{CARISMA}**\n");
+                ficha.Append($"Percepción: *\"{descriptorPERCEPCION}\" *{PERCEPCION}**\n");
+                ficha.Append($"Magia: *\"{descriptorMAGIA}\" *{MAGIA}**\n");
                 #endregion
             }
             catch (Exception ex)

@@ -182,7 +182,6 @@ namespace Bigotes.Commands
         {
             try
             {
-                //Esto va a doler
                 Ficha nuevaFicha = new Ficha();
                 DiscordEmoji emoji = null;
                 var interactivity = ctx.Client.GetInteractivity();
@@ -524,6 +523,20 @@ namespace Bigotes.Commands
                     await caracteristicasMSG.DeleteReactionAsync(arrow_down_smallEmoji, ctx.User).ConfigureAwait(false);
                     await caracteristicasMSG.DeleteReactionAsync(emoji, ctx.User).ConfigureAwait(false);
                 }
+
+                await ctx.Channel.SendMessageAsync("`[CONTADOR GUARDADO]` ```Necesarios-descriptores-sobre-cada-característica. Por-ejemplo: \"INTELIGENCIA: Erutido\" o \"DESTREZA: Pistolero\"```").ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync("```¿Fuerza?```").ConfigureAwait(false);
+                nuevaFicha.descriptorFUERZA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await ctx.Channel.SendMessageAsync("```¿Destreza?```").ConfigureAwait(false);
+                nuevaFicha.descriptorDESTREZA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await ctx.Channel.SendMessageAsync("```¿Inteligencia?```").ConfigureAwait(false);
+                nuevaFicha.descriptorINTELIGENCIA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await ctx.Channel.SendMessageAsync("```¿Carisma?```").ConfigureAwait(false);
+                nuevaFicha.descriptorCARISMA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await ctx.Channel.SendMessageAsync("```¿Percepcion?```").ConfigureAwait(false);
+                nuevaFicha.descriptorPERCEPCION = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await ctx.Channel.SendMessageAsync("```¿Magia?```").ConfigureAwait(false);
+                nuevaFicha.descriptorMAGIA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
                 #endregion
 
                 await ctx.Channel.SendMessageAsync("`[CARACTERÍSTICAS TERMINADAS]` ```Mostrando-resultado-final...```").ConfigureAwait(false);
