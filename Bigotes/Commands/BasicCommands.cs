@@ -123,7 +123,7 @@ namespace Bigotes.Commands
                 //ImageUrl = Constantes.ICON_BIGOTES,
                 Footer = new DiscordEmbedBuilder.EmbedFooter
                 {
-                    Text = "Patrocinio de Zokab International S.L."
+                    Text = "Patrocinio de Zokab International S.L. (Actualmente en fase de pruebas)"
                 },
                 Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail
                 {
@@ -165,7 +165,8 @@ namespace Bigotes.Commands
                     break;
 
                 default:
-                    await ctx.Channel.SendMessageAsync("`ERROR` ```Opción-no-encontrada.```").ConfigureAwait(false);
+                    if (pregunta.Substring(0, 3) != "es ")
+                        await ctx.Channel.SendMessageAsync("`ERROR` ```Opción-no-encontrada.```").ConfigureAwait(false);
                     break;
             }
 

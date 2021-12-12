@@ -73,12 +73,13 @@ namespace Bigotes
             #region Configuración de Lavalink
             var endpoint = new ConnectionEndpoint
             {
-                Hostname = "127.0.0.1",
-                Port = 4767
+                Hostname = "192.168.1.38",
+                Port = 2333
             };
 
             var lavalinkConfig = new LavalinkConfiguration
             {
+                Password = "LavaHostias",
                 RestEndpoint = endpoint,
                 SocketEndpoint = endpoint
             };
@@ -89,10 +90,6 @@ namespace Bigotes
             Client.Ready += OnClientReady;
 
             //await ctx.Channel.SendMessageAsync("`[ACTIVADO PROTOCOLO BOT-DE-BIGOTES]` ```Funciones-principales-activadas.-Bot-a-la-escucha.```");
-
-            #region Gestiones varias
-
-            #endregion
 
             #region Interactividad con el canal (leer, interactuar)
             Client.UseInteractivity(new InteractivityConfiguration

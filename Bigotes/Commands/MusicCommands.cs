@@ -38,6 +38,14 @@ namespace Bigotes.Commands
                 
                 var loadResult = await node.Rest.GetTracksAsync(url);
 
+                //If something went wrong on Lavalink's end                          
+                if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed
+                    //or it just couldn't find anything.
+                    || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+                {
+                    throw new Exception($"Error-cargando: {url}.");
+                }
+
                 //If something went wrong on Lavalink's end or it just couldn't find anything.                  
                 if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches) throw new Exception($"Pista-no-encontrada-en-{url}.");
 

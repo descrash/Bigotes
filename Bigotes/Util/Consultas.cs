@@ -43,7 +43,7 @@ namespace Bigotes.Util
             }
             catch
             {
-                answer = "`ERROR` ```No-se-han-encontrado-resultados-de-la-consulta.```";
+                answer = "`[ERROR]` ```No-se-han-encontrado-resultados-de-la-consulta.```";
             }
 
             return answer;

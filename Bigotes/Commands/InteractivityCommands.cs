@@ -68,7 +68,7 @@ namespace Bigotes.Commands
 
             //var message = await interactivity.WaitForReactionAsync(x => x.Channel.Name == "⚙-roles").ConfigureAwait(false);
 
-            DiscordRole rol;
+            //DiscordRole rol;
 
             //await ctx.Channel.SendMessageAsync(message.Result.User.Mention + " ha reaccionado con " + message.Result.Emoji);
 

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Bigotes.Util;
 
 namespace Bigotes.Commands
 {
@@ -24,24 +25,53 @@ namespace Bigotes.Commands
         [Command("crear")]
         public async Task Create(CommandContext ctx, [RemainingText]string peticion)
         {
-            var interactivity = ctx.Client.GetInteractivity();
-
-            switch (peticion.Trim().ToUpper())
+            try
             {
-                case "ENCUESTA":
-                    await ctx.Channel.SendMessageAsync("`[CREACIÓN DE ENCUESTA ESCOGIDA]` ```Título-de-encuesta-requerido.```").ConfigureAwait(false);
-                    var titulo = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-                    await Poll(ctx, titulo.Result.Content);
-                    break;
+                var interactivity = ctx.Client.GetInteractivity();
 
-                case "FICHA":
-                    await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ```De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
-                    await Ficha(ctx);
-                    break;
+                switch (peticion.Trim().ToUpper())
+                {
+                    case "ENCUESTA":
+                        await ctx.Channel.SendMessageAsync("`[CREACIÓN DE ENCUESTA ESCOGIDA]` ```Título-de-encuesta-requerido.```").ConfigureAwait(false);
+                        var titulo = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+                        await Poll(ctx, titulo.Result.Content);
+                        break;
 
-                case "EVENTO":
-                    await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Comenzando-creación-de-evento.```").ConfigureAwait(false);
-                    break;
+                    case "FICHA":
+                        await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ```De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
+                        await Ficha(ctx);
+                        break;
+
+                    case "EVENTO":
+                        string ans = "SÍ";
+                        if (Utiles.canalEventos != null)
+                        {
+                            await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Canal-de-eventos-escogido: " + Utiles.canalEventos.Name + ". ¿Desea-cambiar-de-canal?```").ConfigureAwait(false);
+                            //TODO: Botones
+                        }
+                        else if (Utiles.canalEventos == null || ans == "SÍ")
+                        {
+                            await ctx.Channel.SendMessageAsync("```Indicar-canal-de-evento: ```").ConfigureAwait(false);
+                            var channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+
+                            ulong channelID = 0;
+                            while(!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)
+                            {
+                                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Recomendable-citar-canal-en-mensaje-para-facilitar-procesamiento. Inténtelo-de-nuevo:```").ConfigureAwait(false);
+                                channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+                            }
+
+                            Utiles.canalEventos = ctx.Guild.GetChannel(channelID);
+                        }
+
+                        await Evento(ctx, Utiles.canalEventos);
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Mensaje-de-error: " + ex.Message.Replace(' ', '-') + " ```").ConfigureAwait(false);
             }
         }
 
@@ -212,7 +242,7 @@ namespace Bigotes.Commands
                     if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-tres-iconos:``` :male_sign: :female_sign: :transgender_symbol:").ConfigureAwait(false);
                     emoji = (await interactivity.WaitForReactionAsync(x => x.Message == generoMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
                 }
-
+                
                 if (emoji == male_signEmoji)
                 {
                     nuevaFicha.genero = Util.Utiles.Genero.MASCULINO;
@@ -549,6 +579,77 @@ namespace Bigotes.Commands
                 };
 
                 await ctx.Channel.SendMessageAsync(embed: embedFicha).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Mensaje-de-error: " + ex.Message.Replace(' ', '-') + " ```").ConfigureAwait(false);
+            }
+        }
+    
+        /// <summary>
+        /// Método para la realización de un evento
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="canalEncuesta"></param>
+        /// <returns></returns>
+        public async Task Evento(CommandContext ctx, DiscordChannel canalEncuesta)
+        {
+            try
+            {
+                Evento nuevoEvento = new Evento();
+                var interactivity = ctx.Client.GetInteractivity();
+
+                #region Nombre
+                await ctx.Channel.SendMessageAsync("```Preparando... Nombre-del-evento:```").ConfigureAwait(false);
+                nuevoEvento.nombre = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Descripción
+                await ctx.Channel.SendMessageAsync("```Descripción-del-evento:```").ConfigureAwait(false);
+                nuevoEvento.descripcion = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                //REVISAR FECHA Y HORA EN PRUEBAS
+                #region Fecha y hora
+                await ctx.Channel.SendMessageAsync("```Concretar-fecha-y-hora-de-realización-con-formato-dd/mm/yyyy hh:mm:```").ConfigureAwait(false);
+                DateTime fechaAux = new DateTime();
+
+                var dateMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+                while (!DateTime.TryParse(dateMSG.Result.Content, out fechaAux))
+                {
+                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Formato-incorrecto. Recomendado-formato-coherente-dd/mm/yyyy hh:mm").ConfigureAwait(false);
+                }
+                
+                nuevoEvento.fecha = fechaAux;
+                #endregion
+
+                #region Lugar
+                await ctx.Channel.SendMessageAsync("```Lugar-del-evento:```").ConfigureAwait(false);
+                nuevoEvento.lugar = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                #endregion
+
+                #region Narradores
+                await ctx.Channel.SendMessageAsync("```Mencionar-al-narrador-o-los-múltiples-narradores:```").ConfigureAwait(false);
+                string[] lstNarradores = ((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content).Trim().Split(',', ' ');
+                nuevoEvento.narradores = lstNarradores.ToList<string>();
+                #endregion
+
+                #region Participantes
+                await ctx.Channel.SendMessageAsync("```Mencionar-a-los-participantes-o-roles-participantes:```").ConfigureAwait(false);
+                string[] lstParticipantes = ((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content).Trim().Split(',', ' ');
+                nuevoEvento.participantes = lstParticipantes.ToList<string>();
+                #endregion
+
+                await ctx.Channel.SendMessageAsync("`[CARACTERÍSTICAS GUARDADAS]` ```Creando-evento-en-canal-correspondiente...```").ConfigureAwait(false);
+
+                var embedFicha = new DiscordEmbedBuilder
+                {
+                    Title = nuevoEvento.nombre,
+                    Description = nuevoEvento.Mostrar().ToString(),
+                    Color = DiscordColor.Red
+                };
+
+                await canalEncuesta.SendMessageAsync(embed: embedFicha).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
