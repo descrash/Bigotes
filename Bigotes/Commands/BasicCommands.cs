@@ -1,4 +1,5 @@
 ﻿using Bigotes.Util;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -191,6 +192,65 @@ namespace Bigotes.Commands
         public async Task Quien(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string pj)
         {
             await ctx.Channel.SendMessageAsync("OPCIÓN NO IMPLEMENTADA").ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// PRUEBA DE BOTONES.
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="pregunta"></param>
+        /// <returns></returns>
+        [Command("botones")]
+        public async Task Botones(CommandContext ctx, [RemainingText]string pregunta)
+        {
+            try
+            {
+                var btnBuilder = Utiles.crearMensajeDeBotones(
+                        ctx,
+                        "Elegir una opción:",
+                        new string[] { "1", "2", "3" },
+                        new string[] { "", "", "" },
+                        new DSharpPlus.ButtonStyle[] { DSharpPlus.ButtonStyle.Primary, DSharpPlus.ButtonStyle.Primary, DSharpPlus.ButtonStyle.Primary },
+                        new string[] { ":one:", ":two:", ":three:" }
+                    );
+
+                var MSG = await ctx.Channel.SendMessageAsync(btnBuilder).ConfigureAwait(false);
+
+
+                var interactivity = ctx.Client.GetInteractivity();
+
+                //ESTO HACE QUE LA RESPUESTA A LA INTERACCIÓN FALLE
+                //var result = await MessageExtensions.WaitForButtonAsync(MSG);
+
+                //Edición de mensaje de botones!
+                ctx.Client.ComponentInteractionCreated += async (s, e) =>
+                {
+                    await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent("Opción-elegida: " + e.Id));
+
+                    switch (e.Id)
+                    {
+                        case "1":
+                            await ctx.Channel.SendMessageAsync("UNO").ConfigureAwait(false);
+                            break;
+                        case "2":
+                            await ctx.Channel.SendMessageAsync("DOS").ConfigureAwait(false);
+                            break;
+                        case "3":
+                            await ctx.Channel.SendMessageAsync("TRES").ConfigureAwait(false);
+                            break;
+                    }
+                };
+
+                //Probamos a poner esto para ver si así hacemos que ESPERE a reaccionar al botón para continuar ejecutando
+                var result = await MessageExtensions.WaitForButtonAsync(MSG);
+
+                await ctx.Channel.SendMessageAsync("BOTÓN PULSADO").ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                await ctx.Channel.SendMessageAsync("Error: " + ex.Message).ConfigureAwait(false);
+            }
         }
     }
 }

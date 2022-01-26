@@ -77,6 +77,88 @@ namespace Bigotes.Util
 
             return msg;
         }
+
+        #region Creación de botones
+        /// <summary>
+        /// Método para la creación de lista de botones.
+        /// Los emojis son opcionales, pero los puede crear desde los nombres.
+        /// Todos los botones estarán HABILITADOS
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="msgTxt"></param>
+        /// <param name="opcionesTXT"></param>
+        /// <param name="estilos"></param>
+        /// <param name="emojiNames">Opcional</param>
+        /// <returns></returns>
+        public static DiscordMessageBuilder crearMensajeDeBotones(CommandContext ctx, string msgTxt, string[] opcionesIDS, string[] opcionesTXT, DSharpPlus.ButtonStyle[] estilos, string[] emojiNames = null)
+        {
+            DiscordMessageBuilder builder;
+            DiscordButtonComponent[] botones = new DiscordButtonComponent[opcionesIDS.Length];
+
+            try
+            {
+                if (emojiNames == null)
+                {
+                    emojiNames = new string[opcionesIDS.Length];
+                }
+
+                if (estilos == null)
+                {
+                    estilos = new DSharpPlus.ButtonStyle[opcionesIDS.Length];
+                }
+
+                for (int i=0; i < opcionesIDS.Length; i++)
+                {
+                    botones[i] = crearBoton(ctx, opcionesIDS[i], opcionesTXT[i], estilos[i] == 0 ? estilos[i] = DSharpPlus.ButtonStyle.Primary : estilos[i], false, emojiNames[i]);
+                }
+
+                builder = new DiscordMessageBuilder()
+                    .WithContent(msgTxt)
+                    .AddComponents(botones);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Método para crear un solo botón.
+        /// Probablemente éste sea mucho más flexible que utilizar uno conjunto.
+        /// NOTA: EL ID SERÁ EL TEXTO DESCRIPTIVO SUSTITUYENDO LOS ESPACIOS POR BARRAS BAJAS
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="opcion"></param>
+        /// <param name="estilo"></param>
+        /// <param name="disabled"></param>
+        /// <param name="emojiName"></param>
+        /// <returns></returns>
+        public static DiscordButtonComponent crearBoton(CommandContext ctx, string customid, string opcion, DSharpPlus.ButtonStyle estilo, bool disabled = false, string emojiName = null)
+        {
+            DiscordButtonComponent button;
+
+            try
+            {
+                if (string.IsNullOrEmpty(emojiName))
+                {
+                    button = new DiscordButtonComponent(estilo, customid, opcion);
+                }
+                else
+                {
+                    DiscordEmoji emoji = DiscordEmoji.FromName(ctx.Client, emojiName);
+                    button = new DiscordButtonComponent(estilo, customid, opcion, disabled, new DiscordComponentEmoji(emoji));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return button;
+        }
+        #endregion
         #endregion
     }
 }

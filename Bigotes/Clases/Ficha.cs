@@ -103,12 +103,12 @@ namespace Bigotes.Clases
 
                 #region CARACTERÍSTICAS
                 ficha.Append("**CARACTERÍSTICAS**\n");
-                ficha.Append($"Fuerza: *\"{descriptorFUERZA}\" *{FUERZA}**\n");
-                ficha.Append($"Destreza: *\"{descriptorDESTREZA}\" *{DESTREZA}**\n");
-                ficha.Append($"Inteligencia: *\"{descriptorINTELIGENCIA}\" *{INTELIGENCIA}**\n");
-                ficha.Append($"Carisma: *\"{descriptorCARISMA}\" *{CARISMA}**\n");
-                ficha.Append($"Percepción: *\"{descriptorPERCEPCION}\" *{PERCEPCION}**\n");
-                ficha.Append($"Magia: *\"{descriptorMAGIA}\" *{MAGIA}**\n");
+                ficha.Append($"Fuerza: *\"{descriptorFUERZA}\"* **{FUERZA}**\n");
+                ficha.Append($"Destreza: *\"{descriptorDESTREZA}\"* **{DESTREZA}**\n");
+                ficha.Append($"Inteligencia: *\"{descriptorINTELIGENCIA}\"* **{INTELIGENCIA}**\n");
+                ficha.Append($"Carisma: *\"{descriptorCARISMA}\"* **{CARISMA}**\n");
+                ficha.Append($"Percepción: *\"{descriptorPERCEPCION}\"* **{PERCEPCION}**\n");
+                ficha.Append($"Magia: *\"{descriptorMAGIA}\"* **{MAGIA}**\n");
                 #endregion
             }
             catch (Exception ex)

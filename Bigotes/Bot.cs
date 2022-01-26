@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
+using DSharpPlus.Entities;
 
 namespace Bigotes
 {
@@ -122,7 +123,8 @@ namespace Bigotes
             #endregion
 
             await Client.ConnectAsync();
-            await lavalink.ConnectAsync(lavalinkConfig);
+            //TODO: Arreglar la conexión a Lavalink
+            //await lavalink.ConnectAsync(lavalinkConfig);
 
             //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
             await Task.Delay(-1);

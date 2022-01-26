@@ -11,6 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bigotes.Util;
+using DSharpPlus;
+using System.Diagnostics;
 
 namespace Bigotes.Commands
 {
@@ -38,8 +40,9 @@ namespace Bigotes.Commands
                         break;
 
                     case "FICHA":
-                        await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ```De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
-                        await Ficha(ctx);
+                        var msg = await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ```De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
+                        await Task.Delay(1000);
+                        await Ficha(ctx, msg);
                         break;
 
                     case "EVENTO":
@@ -55,7 +58,7 @@ namespace Bigotes.Commands
                             var channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
 
                             ulong channelID = 0;
-                            while(!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)
+                            while (!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)
                             {
                                 await ctx.Channel.SendMessageAsync("`[ERROR]` ```Recomendable-citar-canal-en-mensaje-para-facilitar-procesamiento. Inténtelo-de-nuevo:```").ConfigureAwait(false);
                                 channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
@@ -208,201 +211,214 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <param name="nombre"></param>
         /// <returns></returns>
-        public async Task Ficha(CommandContext ctx)
+        public async Task Ficha(CommandContext ctx, DiscordMessage principalMSG)
         {
             try
             {
                 Ficha nuevaFicha = new Ficha();
                 DiscordEmoji emoji = null;
                 var interactivity = ctx.Client.GetInteractivity();
+                DiscordMessage interMSG;
                 DiscordColor color = DiscordColor.Brown;
+                int currentButtonsBuilder = 0; //Para controlar en qué mensaje de botones se encuentra
 
                 #region DATOS BÁSICOS
                 #region Nombre y apellidos
-                await ctx.Channel.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
-                nuevaFicha.nombre_completo = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[OPCIÓN ESCOGIDA]` ```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.nombre_completo = interMSG.Content;
+                await interMSG.DeleteAsync();
 
-                await ctx.Channel.SendMessageAsync("`[NOMBRE GUARDADO]` ```2: Apellidos.```").ConfigureAwait(false);
-                nuevaFicha.apellidos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[NOMBRE GUARDADO: " + nuevaFicha.nombre_completo + "]` ```2: Apellidos.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.apellidos = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Género
-                var male_signEmoji = DiscordEmoji.FromName(ctx.Client, ":male_sign:");
-                var female_signEmoji = DiscordEmoji.FromName(ctx.Client, ":female_sign:");
-                var transgender_symbolEmoji = DiscordEmoji.FromName(ctx.Client, ":transgender_symbol:");
+                var genderBtnBuilder = Utiles.crearMensajeDeBotones(
+                        ctx,
+                        "`[APELLIDOS GUARDADOS: " + nuevaFicha.apellidos + "]` ```3: Elegir-género-entre-masculino, femenino-o-no-binario:```",
+                        new string[] { "MASCULINO", "FEMENINO", "NOBINARIO" },
+                        new string[] { "", "", "" },
+                        null,
+                        new string[] { ":male_sign:", ":female_sign:", ":transgender_symbol:" }
+                    );
 
-                var generoMSG = await ctx.Channel.SendMessageAsync("`[APELLIDOS GUARDADOS]` ```3: Reaccionar-a-este-mensaje-con-icono-de-género:``` Masculino :male_sign:\nFemenino :female_sign:\nNo binario :transgender_symbol:").ConfigureAwait(false);
+                await principalMSG.ModifyAsync(genderBtnBuilder).ConfigureAwait(false);
 
-                await generoMSG.CreateReactionAsync(male_signEmoji).ConfigureAwait(false);
-                await generoMSG.CreateReactionAsync(female_signEmoji).ConfigureAwait(false);
-                await generoMSG.CreateReactionAsync(transgender_symbolEmoji).ConfigureAwait(false);
+                //var result = await MessageExtensions.WaitForButtonAsync(genderMSG);
+                ctx.Client.ComponentInteractionCreated += async (s, e) =>
+                {
+                    ///Probamos con una variable para indicar en CUÁL de ambas opciones está. Podrían estar cruzándose los hilos.
+                    if (currentButtonsBuilder == 0)
+                    {
 
-                while (emoji == null || !(new[] { male_signEmoji, female_signEmoji, transgender_symbolEmoji }.Contains(emoji)))
-                {
-                    if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-tres-iconos:``` :male_sign: :female_sign: :transgender_symbol:").ConfigureAwait(false);
-                    emoji = (await interactivity.WaitForReactionAsync(x => x.Message == generoMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
-                }
-                
-                if (emoji == male_signEmoji)
-                {
-                    nuevaFicha.genero = Util.Utiles.Genero.MASCULINO;
-                }
-                else if (emoji == female_signEmoji)
-                {
-                    nuevaFicha.genero = Util.Utiles.Genero.FEMENINO;
-                }
-                else if (emoji == transgender_symbolEmoji)
-                {
-                    nuevaFicha.genero = Util.Utiles.Genero.NOBINARIO;
-                }
+                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent("`[GÉNERO GUARDADO: " + e.Id + "]` ```4: Año-de-nacimiento.```"));
 
-                emoji = null;
+                        //Se usan los IDs directamente para ligarlo al enumerador
+                        nuevaFicha.genero = (Util.Utiles.Genero)Enum.Parse(typeof(Util.Utiles.Genero), e.Id.ToString().ToUpper());
+
+                    }
+                };
                 #endregion
 
                 #region Edad
-                await ctx.Channel.SendMessageAsync("`[GÉNERO GUARDADO]` ```4: Año-de-nacimiento.```").ConfigureAwait(false);
+                //await principalMSG.ModifyAsync("```4: Año-de-nacimiento.```").ConfigureAwait(false);
                 int anio;
-                while (!Int32.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out anio))
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                while (!Int32.TryParse(interMSG.Content, out anio))
                 {
-                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
+                    await principalMSG.ModifyAsync("`[ERROR]` ```Insertar-número-válido-para-el-año-de-nacimiento.```").ConfigureAwait(false);
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
                 }
                 nuevaFicha.bird_year = anio;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Raza
+                currentButtonsBuilder = 1;
+
                 var humanoEmoji = DiscordEmoji.FromName(ctx.Client, ":humano:");
                 var charrEmoji = DiscordEmoji.FromName(ctx.Client, ":charr:");
                 var nornEmoji = DiscordEmoji.FromName(ctx.Client, ":norn:");
                 var asuraEmoji = DiscordEmoji.FromName(ctx.Client, ":asura:");
                 var sylvariEmoji = DiscordEmoji.FromName(ctx.Client, ":sylvari:");
-                var mundoEmoji = DiscordEmoji.FromName(ctx.Client, ":mundo:");
+                ///Dado que el mensaje sólo acepta CINCO BOTONES, descartaremos "otros" por el
+                ///momento
+                //var mundoEmoji = DiscordEmoji.FromName(ctx.Client, ":mundo:");
 
-                var raceMSG = await ctx.Channel.SendMessageAsync("`[APELLIDOS GUARDADOS]` ```5: Reaccionar-a-este-mensaje-con-icono-de-raza: ```Humano " + humanoEmoji + "\nCharr " + charrEmoji + "\nNorn " + nornEmoji + "\nAsura " + asuraEmoji + "\nSylvari " + sylvariEmoji + "\nOtros " + mundoEmoji).ConfigureAwait(false);
+                var raceBtnBuilder = new DiscordMessageBuilder();
 
-                await raceMSG.CreateReactionAsync(humanoEmoji).ConfigureAwait(false);
-                await raceMSG.CreateReactionAsync(charrEmoji).ConfigureAwait(false);
-                await raceMSG.CreateReactionAsync(nornEmoji).ConfigureAwait(false);
-                await raceMSG.CreateReactionAsync(asuraEmoji).ConfigureAwait(false);
-                await raceMSG.CreateReactionAsync(sylvariEmoji).ConfigureAwait(false);
-                await raceMSG.CreateReactionAsync(mundoEmoji).ConfigureAwait(false);
+                raceBtnBuilder = Utiles.crearMensajeDeBotones(
+                        ctx,
+                        "`[EDAD REGISTRADA: " + nuevaFicha.bird_year + "]` ```3: Elegir-raza:```",
+                        new string[] { "HUMANO", "CHARR", "NORN", "ASURA", "SYLVARI" },
+                        new string[] { "Humano", "Charr", "Norn", "Asura", "Sylvari" },
+                        null,
+                        new string[] { ":humano:", ":charr:", ":norn:", ":asura:", ":sylvari:" }
+                    );
 
-                while (emoji == null || !(new[] { humanoEmoji, charrEmoji, nornEmoji, asuraEmoji, sylvariEmoji, mundoEmoji }.Contains(emoji)))
-                {
-                    if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
-                    emoji = (await interactivity.WaitForReactionAsync(x => x.Message == raceMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
-                }
+                await principalMSG.ModifyAsync(raceBtnBuilder).ConfigureAwait(false);
 
-                if (emoji == humanoEmoji)
+                ctx.Client.ComponentInteractionCreated += async (s, e) =>
                 {
-                    nuevaFicha.raza = Util.Utiles.Raza.HUMANO;
-                    color = DiscordColor.Gold;
-                }
-                else if (emoji == charrEmoji)
-                {
-                    nuevaFicha.raza = Util.Utiles.Raza.CHARR;
-                    color = DiscordColor.DarkRed;
-                }
-                else if (emoji == nornEmoji)
-                {
-                    nuevaFicha.raza = Util.Utiles.Raza.NORN;
-                    color = DiscordColor.Azure;
-                }
-                else if (emoji == asuraEmoji)
-                {
-                    nuevaFicha.raza = Util.Utiles.Raza.ASURA;
-                    color = DiscordColor.Purple;
-                }
-                else if (emoji == sylvariEmoji)
-                {
-                    nuevaFicha.raza = Util.Utiles.Raza.SYLVARI;
-                    color = DiscordColor.DarkGreen;
-                }
-                else if (emoji == mundoEmoji)
-                {
-                    nuevaFicha.raza = Util.Utiles.Raza.OTROS;
-                }
+                    ///Probamos con una variable para indicar en CUÁL de ambas opciones está. Podrían estar cruzándose los hilos.
+                    if (currentButtonsBuilder == 1)
+                    {
 
-                emoji = null;
+                        await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent("`[RAZA GUARDADA: " + e.Id + "]` ```6: Ocupación-actual.```"));
+                        nuevaFicha.raza = (Util.Utiles.Raza)Enum.Parse(typeof(Util.Utiles.Raza), e.Id.ToUpper());
+
+                    }
+                };
                 #endregion
 
                 #region Ocupación
-                await ctx.Channel.SendMessageAsync("`[RAZA GUARDADA]` ```6: Ocupación-actual.```").ConfigureAwait(false);
-                nuevaFicha.ocupacion = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.ocupacion = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
                 #endregion
 
                 #region DATOS FÍSICOS
                 #region Descripción física
-                await ctx.Channel.SendMessageAsync("`[OCUPACIÓN GUARDADA]` ```Pasando-a-DATOS-FÍSICOS. 7: Descripción-física.```").ConfigureAwait(false);
-                nuevaFicha.descripcion_fisica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[OCUPACIÓN GUARDADA: " + nuevaFicha.ocupacion +"]` ```Pasando-a-DATOS-FÍSICOS. 7: Descripción-física.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descripcion_fisica = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Altura y peso
-                await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN FÍSICA GUARDADA]` ```8: Altura-aproximada.```").ConfigureAwait(false);
+                await principalMSG.ModifyAsync("`[DESCRIPCIÓN FÍSICA GUARDADA]` ```8: Altura-aproximada.```").ConfigureAwait(false);
                 double altura;
-                while (!Double.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out altura))
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                while (!Double.TryParse(interMSG.Content, out altura))
                 {
-                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
+                    await principalMSG.ModifyAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
                 }
                 nuevaFicha.altura = altura;
+                await interMSG.DeleteAsync();
 
-                await ctx.Channel.SendMessageAsync("`[ALTURA GUARDADA]` ```9: Peso-aproximado.```").ConfigureAwait(false);
+                await principalMSG.ModifyAsync("`[ALTURA GUARDADA: " + nuevaFicha.altura + "]` ```9: Peso-aproximado.```").ConfigureAwait(false);
                 double peso;
-                while (!Double.TryParse((await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content, out peso))
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                while (!Double.TryParse(interMSG.Content, out peso))
                 {
-                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
+                    await principalMSG.ModifyAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
                 }
                 nuevaFicha.peso = peso;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Condición física
-                await ctx.Channel.SendMessageAsync("`[PESO GUARDADO]` ```10: Condición-física.```").ConfigureAwait(false);
-                nuevaFicha.condicion_fisica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[PESO GUARDADO: " + nuevaFicha.peso + "]` ```10: Condición-física.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.condicion_fisica = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Color de ojos y pelo
-                await ctx.Channel.SendMessageAsync("`[CONDICIÓN FÍSICA GUARDADA]` ```11: Color-de-ojos.```").ConfigureAwait(false);
-                nuevaFicha.color_ojos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[CONDICIÓN FÍSICA GUARDADA]` ```11: Color-de-ojos.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.color_ojos = interMSG.Content;
+                await interMSG.DeleteAsync();
 
-                await ctx.Channel.SendMessageAsync("`[COLOR DE OJOS GUARDADO]` ```12: Color-de-pelo.```").ConfigureAwait(false);
-                nuevaFicha.color_pelo = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[COLOR DE OJOS GUARDADO: " + nuevaFicha.color_ojos + "]` ```12: Color-de-pelo.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.color_pelo = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Rasgos característicos
-                await ctx.Channel.SendMessageAsync("`[COLOR DE PELO GUARDADO]` ```13: Rasgos-característicos.```").ConfigureAwait(false);
-                nuevaFicha.rasgos_caracteristicos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[COLOR DE PELO GUARDADO: " + nuevaFicha.color_pelo + "]` ```13: Rasgos-característicos.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.rasgos_caracteristicos = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
                 #endregion
 
                 #region DATOS PSICOLÓGICOS
                 #region Descripción psicológica
-                await ctx.Channel.SendMessageAsync("`[RASGOS GUARDADOS]` ```Pasando-a-DATOS-PSICOLÓGICOS. 14: Descripción-psicológica.```").ConfigureAwait(false);
-                nuevaFicha.descripcion_psicologica = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[RASGOS GUARDADOS]` ```Pasando-a-DATOS-PSICOLÓGICOS. 14: Descripción-psicológica.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descripcion_psicologica = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Disgustos
-                await ctx.Channel.SendMessageAsync("`[DESCRIPCIÓN PSICOLÓGICA GUARDADA]` ```15: Disgustos.```").ConfigureAwait(false);
-                nuevaFicha.disgustos = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[DESCRIPCIÓN PSICOLÓGICA GUARDADA]` ```15: Disgustos.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.disgustos = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Habilidades
-                await ctx.Channel.SendMessageAsync("`[DISGUSTOS GUARDADOS]` ```16: Habilidades.```").ConfigureAwait(false);
-                nuevaFicha.habilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[DISGUSTOS GUARDADOS]` ```16: Habilidades.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.habilidades = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Debilidades
-                await ctx.Channel.SendMessageAsync("`[HABILIDADES GUARDADAS]` ```17: Debilidades.```").ConfigureAwait(false);
-                nuevaFicha.debilidades = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[HABILIDADES GUARDADAS]` ```17: Debilidades.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.debilidades = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
                 #endregion
 
                 #region HISTORIA PERSONAL
-                await ctx.Channel.SendMessageAsync("`[DEBILIDADES GUARDADAS]` ```Insertar-a-continuación-historia-personal. Puede-ser-texto, un-enlace-a-documento-o-dejarlo-en-blanco.```").ConfigureAwait(false);
-                nuevaFicha.historia_personal = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[DEBILIDADES GUARDADAS]` ```Insertar-a-continuación-historia-personal. Puede-ser-texto, un-enlace-a-documento-o-dejarlo-en-blanco.```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.historia_personal = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
                 #region CARACTERÍSTICAS
-                await ctx.Channel.SendMessageAsync("`[HISTORIA GUARDADA]` ```Ahora-pasaremos-a-las-características.```").ConfigureAwait(false);
+                await principalMSG.ModifyAsync("`[HISTORIA GUARDADA]` ```Ahora-pasaremos-a-las-características.```").ConfigureAwait(false);
 
                 var muscleEmoji = DiscordEmoji.FromName(ctx.Client, ":muscle:");
                 var jugglerEmoji = DiscordEmoji.FromName(ctx.Client, ":juggler:");
@@ -414,7 +430,7 @@ namespace Bigotes.Commands
                 var white_check_markEmoji = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
                 var xEmoji = DiscordEmoji.FromName(ctx.Client, ":x:");
 
-                await ctx.Channel.SendMessageAsync("```A-continuación, se-muestran-las-instrucciones:``` Primero, se-contarán-los-puntos-por-características. Éstas-son-**FUERZA** " + muscleEmoji + ", **DESTREZA** " + jugglerEmoji + ", **INTELIGENCIA** " + brainEmoji + ", **CARISMA** " + dancerEmoji + ", **PERCEPCIÓN** " + eyeEmoji + "-y-**MAGIA** " + magic_wandEmoji + ". Los-puntos-máximos-"
+                await principalMSG.ModifyAsync("```Instrucciones:``` Primero, se-contarán-los-puntos-por-características. Éstas-son-**FUERZA** " + muscleEmoji + ", **DESTREZA** " + jugglerEmoji + ", **INTELIGENCIA** " + brainEmoji + ", **CARISMA** " + dancerEmoji + ", **PERCEPCIÓN** " + eyeEmoji + "-y-**MAGIA** " + magic_wandEmoji + ". Los-puntos-máximos-"
                     + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-**MAGIA**, donde-el-máximo-serán-3.\nPresionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Para-**restar**, pulsar " + arrow_down_smallEmoji + "-y-la-característica-concreta. Puede-haber-números-negativos-en-función-"
                     + "de-las-cualidades-del-personaje. Al-**terminar**, pulsar " + white_check_markEmoji + ". En-caso-de-querer-**reiniciar**, pulsar " + xEmoji + ".").ConfigureAwait(false);
 
@@ -440,7 +456,7 @@ namespace Bigotes.Commands
 
                     while (emoji == null || !(new[] { muscleEmoji, jugglerEmoji, brainEmoji, dancerEmoji, eyeEmoji, magic_wandEmoji, arrow_down_smallEmoji, white_check_markEmoji, xEmoji }.Contains(emoji)))
                     {
-                        if (emoji != null) await ctx.Channel.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
+                        if (emoji != null) await principalMSG.ModifyAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
                         emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
                     }
 
@@ -554,22 +570,34 @@ namespace Bigotes.Commands
                     await caracteristicasMSG.DeleteReactionAsync(emoji, ctx.User).ConfigureAwait(false);
                 }
 
-                await ctx.Channel.SendMessageAsync("`[CONTADOR GUARDADO]` ```Necesarios-descriptores-sobre-cada-característica. Por-ejemplo: \"INTELIGENCIA: Erutido\" o \"DESTREZA: Pistolero\"```").ConfigureAwait(false);
-                await ctx.Channel.SendMessageAsync("```¿Fuerza?```").ConfigureAwait(false);
-                nuevaFicha.descriptorFUERZA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-                await ctx.Channel.SendMessageAsync("```¿Destreza?```").ConfigureAwait(false);
-                nuevaFicha.descriptorDESTREZA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-                await ctx.Channel.SendMessageAsync("```¿Inteligencia?```").ConfigureAwait(false);
-                nuevaFicha.descriptorINTELIGENCIA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-                await ctx.Channel.SendMessageAsync("```¿Carisma?```").ConfigureAwait(false);
-                nuevaFicha.descriptorCARISMA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-                await ctx.Channel.SendMessageAsync("```¿Percepcion?```").ConfigureAwait(false);
-                nuevaFicha.descriptorPERCEPCION = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
-                await ctx.Channel.SendMessageAsync("```¿Magia?```").ConfigureAwait(false);
-                nuevaFicha.descriptorMAGIA = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
+                await principalMSG.ModifyAsync("`[CONTADOR GUARDADO]` ```Necesarios-descriptores-sobre-cada-característica. Por-ejemplo: \"INTELIGENCIA: Erutido\" o \"DESTREZA: Pistolero\"```").ConfigureAwait(false);
+                await caracteristicasMSG.ModifyAsync("```¿Fuerza?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descriptorFUERZA = interMSG.Content;
+                await interMSG.DeleteAsync();
+                await caracteristicasMSG.ModifyAsync("```¿Destreza?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descriptorDESTREZA = interMSG.Content;
+                await interMSG.DeleteAsync();
+                await caracteristicasMSG.ModifyAsync("```¿Inteligencia?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descriptorINTELIGENCIA = interMSG.Content;
+                await interMSG.DeleteAsync();
+                await caracteristicasMSG.ModifyAsync("```¿Carisma?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descriptorCARISMA = interMSG.Content;
+                await interMSG.DeleteAsync();
+                await caracteristicasMSG.ModifyAsync("```¿Percepcion?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descriptorPERCEPCION = interMSG.Content;
+                await interMSG.DeleteAsync();
+                await caracteristicasMSG.ModifyAsync("```¿Magia?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                nuevaFicha.descriptorMAGIA = interMSG.Content;
+                await interMSG.DeleteAsync();
                 #endregion
 
-                await ctx.Channel.SendMessageAsync("`[CARACTERÍSTICAS TERMINADAS]` ```Mostrando-resultado-final...```").ConfigureAwait(false);
+                await principalMSG.ModifyAsync("`[CARACTERÍSTICAS TERMINADAS]` ```Mostrando-resultado-final...```").ConfigureAwait(false);
 
                 var embedFicha = new DiscordEmbedBuilder
                 {
@@ -585,7 +613,7 @@ namespace Bigotes.Commands
                 await ctx.Channel.SendMessageAsync("`[ERROR]` ```Mensaje-de-error: " + ex.Message.Replace(' ', '-') + " ```").ConfigureAwait(false);
             }
         }
-    
+
         /// <summary>
         /// Método para la realización de un evento
         /// </summary>
@@ -619,7 +647,7 @@ namespace Bigotes.Commands
                 {
                     await ctx.Channel.SendMessageAsync("`[ERROR]` ```Formato-incorrecto. Recomendado-formato-coherente-dd/mm/yyyy hh:mm").ConfigureAwait(false);
                 }
-                
+
                 nuevoEvento.fecha = fechaAux;
                 #endregion
 
