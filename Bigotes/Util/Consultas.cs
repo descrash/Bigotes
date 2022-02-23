@@ -16,7 +16,7 @@ namespace Bigotes.Util
         /// </summary>
         /// <param name="eres">Nombre a consultar</param>
         /// <returns></returns>
-        public static string QueEs(string es)
+        public static string QueEs(string es, CommandContext ctx)
         {
             #region Propiedades
             string answer = "`EXTRAYENDO FRAGMENTO DE LA BASE DE DATOS DE RATA SUM` ";
@@ -33,6 +33,7 @@ namespace Bigotes.Util
 
                 using (WebClient client = new WebClient())
                 {
+                    client.Headers.Add("User-Agent: Other");
                     resultado = client.DownloadString(url + busqueda);
                 }
 
@@ -41,9 +42,9 @@ namespace Bigotes.Util
                 answer += "```" + Regex.Replace(resultado.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1], "<.*?>", String.Empty).Replace(' ', '-') + "```";
                 //+ "Fuente: " + url + busqueda).ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
-                answer = "`[ERROR]` ```No-se-han-encontrado-resultados-de-la-consulta.```";
+                answer = "`[ERROR]` ```No-se-han-encontrado-resultados-de-la-consulta: " + ex.Message.Replace(' ', '-') + ".```";
             }
 
             return answer;

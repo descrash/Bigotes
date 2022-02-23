@@ -43,6 +43,17 @@ namespace Bigotes.Util
             SYLVARI,
             OTROS
         }
+
+        /// <summary>
+        /// Lista de roles administradores que se iniciarán al inicio del bot para recoger
+        /// aquellos roles con permisos de ADMIN
+        /// </summary>
+        public static List<DiscordRole> rolesAdministradores;
+
+        /// <summary>
+        /// Lista de roles asignables por los usuarios.
+        /// </summary>
+        public static List<DiscordRole> rolesAsignables = new List<DiscordRole>();
         #endregion
 
         #region Métodos

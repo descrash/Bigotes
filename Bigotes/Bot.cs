@@ -114,10 +114,10 @@ namespace Bigotes
 
             #region Registro de comandos
             Commands.RegisterCommands<BasicCommands>();
-            Commands.RegisterCommands<InteractivityCommands>();
             Commands.RegisterCommands<DiceCommands>();
             Commands.RegisterCommands<CreationCommands>();
             Commands.RegisterCommands<MusicCommands>();
+            Commands.RegisterCommands<ManagementCommands>();
             #endregion
 
             #endregion
