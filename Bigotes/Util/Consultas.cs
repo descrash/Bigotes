@@ -124,7 +124,7 @@ namespace Bigotes.Util
                     String[] tagsID = { "#", "<", ">" };
 
                     //Se compara nombre si se ha puesto únicamente el nombre ("general") o el ID en caso de haber puesto el tag entero ("#general")
-                    if (_channel.Name == channelName.Trim() || channel.Id.ToString() == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                    if (_channel.Name == channelName.Trim() || _channel.Id.ToString() == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
                     {
                         channel = _channel;
                     }

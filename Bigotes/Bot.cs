@@ -74,7 +74,7 @@ namespace Bigotes
             #region Configuración de Lavalink
             var endpoint = new ConnectionEndpoint
             {
-                Hostname = "192.168.1.38",
+                Hostname = "127.0.0.1",
                 Port = 2333
             };
 
@@ -124,7 +124,7 @@ namespace Bigotes
 
             await Client.ConnectAsync();
             //TODO: Arreglar la conexión a Lavalink
-            //await lavalink.ConnectAsync(lavalinkConfig);
+            await lavalink.ConnectAsync(lavalinkConfig);
 
             //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
             await Task.Delay(-1);
