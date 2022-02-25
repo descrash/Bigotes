@@ -16,6 +16,7 @@ namespace Bigotes.Commands
         /// Comando para reproducir música.
         /// IMPORTANTE: Ha de estar ejecutándose el servidor LAVALINK
         /// para poder encontrar una conexión.
+        /// ACTUALMENTE EN PROCESO...
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="url"></param>

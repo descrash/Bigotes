@@ -25,7 +25,7 @@ namespace Bigotes.Commands
         /// <param name="peticion"></param>
         /// <returns></returns>
         [Command("crear")]
-        [Description("Creación de distintas utilidades.")]
+        [Description("Creación de distintas utilidades: CREAR ENCUESTA, CREAR FICHA O CREAR EVENTO.")]
         public async Task Create(CommandContext ctx, [Description("Nombre de la utilidad: encuesta, ficha o evento.")][RemainingText]string peticion)
         {
             try
@@ -173,7 +173,7 @@ namespace Bigotes.Commands
 
                 interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == author).ConfigureAwait(false)).Result;
                 string channelName = interMSG.Content;
-                embedChannel = Util.Consultas.GetChannel(ctx, channelName);
+                embedChannel = Consultas.GetChannel(ctx, channelName);
 
                 await interMSG.DeleteAsync();
                 #endregion
@@ -245,7 +245,11 @@ namespace Bigotes.Commands
 
                 foreach (var _emoji in emojiOptions)
                 {
-                    var votos = distinctResult.Where(x => x.Emoji == _emoji).FirstOrDefault().Total;
+                    int votos = 0;
+                    if (distinctResult.Where(x => x.Emoji == _emoji).Count() > 0)
+                    {
+                        votos = distinctResult.Where(x => x.Emoji == _emoji).FirstOrDefault().Total;
+                    }
                     results.Add($"{_emoji}: {votos}");
                 }
 
@@ -279,7 +283,7 @@ namespace Bigotes.Commands
                 DiscordEmoji emoji = null;
                 var interactivity = ctx.Client.GetInteractivity();
                 DiscordMessage interMSG;
-                DiscordColor color = DiscordColor.Brown;
+                DiscordColor color = DiscordColor.Yellow;
                 int currentButtonsBuilder = 0; //Para controlar en qué mensaje de botones se encuentra
                 #endregion
 
@@ -371,6 +375,21 @@ namespace Bigotes.Commands
                         await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent("`[RAZA GUARDADA: " + e.Id + "]` ```6: Ocupación-actual.```"));
                         nuevaFicha.raza = (Util.Utiles.Raza)Enum.Parse(typeof(Util.Utiles.Raza), e.Id.ToUpper());
 
+                        switch(nuevaFicha.raza)
+                        {
+                            case Utiles.Raza.ASURA:
+                                color = DiscordColor.Purple;
+                                break;
+                            case Utiles.Raza.CHARR:
+                                color = DiscordColor.Red;
+                                break;
+                            case Utiles.Raza.NORN:
+                                color = DiscordColor.CornflowerBlue;
+                                break;
+                            case Utiles.Raza.SYLVARI:
+                                color = DiscordColor.SapGreen;
+                                break;
+                        }
                     }
                 };
                 #endregion
@@ -739,50 +758,6 @@ namespace Bigotes.Commands
                 };
 
                 await canalEncuesta.SendMessageAsync(embed: embedFicha).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                await Error.MostrarError(ctx, ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Método para la creación de un rol que añadir
-        /// a la lista de roles asignables por usuarios
-        /// OPCIÓN DESCARTADA POR EL MOMENTO
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <returns></returns>
-        [RequireRoles(RoleCheckMode.Any, "Moderator", "Owner")]
-        public async Task Rol(CommandContext ctx, DiscordMessage principalMSG)
-        {
-            try
-            {
-                #region Atributos
-                DiscordMessage interMSG;
-                var interactivity = ctx.Client.GetInteractivity();
-                string nombre, emojiID;
-                #endregion
-
-                await principalMSG.ModifyAsync("`[ROLES REVISADOS]` ```Se-ha-solicitado-que-un-rol-sea-gestionable-por-los-usuarios. Necesario-nombre-del-rol:```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
-
-                while (ctx.Guild.Roles.Values.Where(x => x.Name.ToUpper() == interMSG.Content.ToUpper()).Count() <= 0)
-                {
-                    await principalMSG.ModifyAsync("`[ERROR]` ```No-se-ha-encontrado-el-rol-nombrado. Probar-otra-vez:```").ConfigureAwait(false);
-                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
-                }
-
-                nombre = interMSG.Content;
-
-                Utiles.rolesAsignables.Add(ctx.Guild.Roles.Values.Where(x => x.Name.ToUpper() == nombre.ToUpper()).First());
-                await interMSG.DeleteAsync();
-                await principalMSG.ModifyAsync("`[ROL ENCONTRADO Y AÑADIDO: #" + nombre + "]`").ConfigureAwait(false);
-
-                //await principalMSG.ModifyAsync("`[ROL ENCONTRADO: #" + nombre + "]` ```Siguiente-paso: escribir-emoticono-adjunto-al-rol:```").ConfigureAwait(false);
-                //interMSG = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result;
-
-                //emojiID = interMSG.Content;
             }
             catch (Exception ex)
             {

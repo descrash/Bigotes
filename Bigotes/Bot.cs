@@ -117,7 +117,6 @@ namespace Bigotes
             Commands.RegisterCommands<DiceCommands>();
             Commands.RegisterCommands<CreationCommands>();
             Commands.RegisterCommands<MusicCommands>();
-            Commands.RegisterCommands<ManagementCommands>();
             #endregion
 
             #endregion
