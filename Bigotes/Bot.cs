@@ -45,90 +45,97 @@ namespace Bigotes
         /// <returns></returns>
         public async Task RunAsync()
         {
-            #region Obtención de fichero de configuración (JSON)
-            string jsonSTR = string.Empty;
-            ConfigJSON ConfigJson;
-
-            using(var fs = File.OpenRead("config.json"))
+            try
             {
-                using(var sr = new StreamReader(fs, new UTF8Encoding(false)))
+                #region Obtención de fichero de configuración (JSON)
+                string jsonSTR = string.Empty;
+                ConfigJSON ConfigJson;
+
+                using (var fs = File.OpenRead("config.json"))
                 {
-                    jsonSTR = await sr.ReadToEndAsync().ConfigureAwait(false);
+                    using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
+                    {
+                        jsonSTR = await sr.ReadToEndAsync().ConfigureAwait(false);
+                    }
                 }
+
+                ConfigJson = JsonConvert.DeserializeObject<ConfigJSON>(jsonSTR);
+                #endregion
+
+                #region Configuración de bot
+                DiscordConfiguration config = new DiscordConfiguration
+                {
+                    Token = ConfigJson.Token,
+                    TokenType = TokenType.Bot,
+                    AutoReconnect = true,
+                    MinimumLogLevel = LogLevel.Debug
+                };
+
+                Client = new DiscordClient(config);
+                #endregion
+
+                #region Configuración de Lavalink
+                var endpoint = new ConnectionEndpoint
+                {
+                    Hostname = "127.0.0.1",
+                    Port = 2333
+                };
+
+                var lavalinkConfig = new LavalinkConfiguration
+                {
+                    Password = "LavaHostias",
+                    RestEndpoint = endpoint,
+                    SocketEndpoint = endpoint
+                };
+
+                var lavalink = Client.UseLavalink();
+                #endregion
+
+                Client.Ready += OnClientReady;
+
+                //await ctx.Channel.SendMessageAsync("`[ACTIVADO PROTOCOLO BOT-DE-BIGOTES]` ```Funciones-principales-activadas.-Bot-a-la-escucha.```");
+
+                #region Interactividad con el canal (leer, interactuar)
+                Client.UseInteractivity(new InteractivityConfiguration
+                {
+                    PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
+                    Timeout = TimeSpan.FromMinutes(30) //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
+                });
+                #endregion
+
+                #region Comandos
+                CommandsNextConfiguration commandsConfig = new CommandsNextConfiguration
+                {
+                    StringPrefixes = new string[] { ConfigJson.Prefix },
+                    EnableDms = false,
+                    EnableMentionPrefix = true,
+                    IgnoreExtraArguments = true,
+                    //EnableDefaultHelp = false, <- ASEGURARSE DE TENER COMANDO DE AYUDA PROPIO
+                };
+
+                Commands = Client.UseCommandsNext(commandsConfig);
+                Commands.SetHelpFormatter<CustomHelpFormatter>();
+
+                #region Registro de comandos
+                Commands.RegisterCommands<BasicCommands>();
+                Commands.RegisterCommands<DiceCommands>();
+                Commands.RegisterCommands<CreationCommands>();
+                Commands.RegisterCommands<MusicCommands>();
+                #endregion
+
+                #endregion
+
+                await Client.ConnectAsync();
+                //TODO: Arreglar la conexión a Lavalink
+                await lavalink.ConnectAsync(lavalinkConfig);
+
+                //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
+                await Task.Delay(-1);
             }
-
-            ConfigJson = JsonConvert.DeserializeObject<ConfigJSON>(jsonSTR);
-            #endregion
-
-            #region Configuración de bot
-            DiscordConfiguration config = new DiscordConfiguration
+            catch (Exception ex)
             {
-                Token = ConfigJson.Token,
-                TokenType = TokenType.Bot,
-                AutoReconnect = true,
-                MinimumLogLevel = LogLevel.Debug
-            };
-
-            Client = new DiscordClient(config);
-            #endregion
-
-            #region Configuración de Lavalink
-            var endpoint = new ConnectionEndpoint
-            {
-                Hostname = "127.0.0.1",
-                Port = 2333
-            };
-
-            var lavalinkConfig = new LavalinkConfiguration
-            {
-                Password = "LavaHostias",
-                RestEndpoint = endpoint,
-                SocketEndpoint = endpoint
-            };
-
-            var lavalink = Client.UseLavalink();
-            #endregion
-
-            Client.Ready += OnClientReady;
-
-            //await ctx.Channel.SendMessageAsync("`[ACTIVADO PROTOCOLO BOT-DE-BIGOTES]` ```Funciones-principales-activadas.-Bot-a-la-escucha.```");
-
-            #region Interactividad con el canal (leer, interactuar)
-            Client.UseInteractivity(new InteractivityConfiguration
-            {
-                PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromMinutes(30) //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
-            });
-            #endregion
-
-            #region Comandos
-            CommandsNextConfiguration commandsConfig = new CommandsNextConfiguration
-            {
-                StringPrefixes = new string[] { ConfigJson.Prefix },
-                EnableDms = false,
-                EnableMentionPrefix = true,
-                IgnoreExtraArguments = true,
-                //EnableDefaultHelp = false, <- ASEGURARSE DE TENER COMANDO DE AYUDA PROPIO
-            };
-
-            Commands = Client.UseCommandsNext(commandsConfig);
-            Commands.SetHelpFormatter<CustomHelpFormatter>();
-
-            #region Registro de comandos
-            Commands.RegisterCommands<BasicCommands>();
-            Commands.RegisterCommands<DiceCommands>();
-            Commands.RegisterCommands<CreationCommands>();
-            Commands.RegisterCommands<MusicCommands>();
-            #endregion
-
-            #endregion
-
-            await Client.ConnectAsync();
-            //TODO: Arreglar la conexión a Lavalink
-            await lavalink.ConnectAsync(lavalinkConfig);
-
-            //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
-            await Task.Delay(-1);
+                throw ex;
+            }
         }
 
         /// <summary>
