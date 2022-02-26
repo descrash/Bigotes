@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Entities;
+using Bigotes.Clases;
 
 namespace Bigotes
 {
@@ -111,6 +112,7 @@ namespace Bigotes
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
+            Commands.SetHelpFormatter<CustomHelpFormatter>();
 
             #region Registro de comandos
             Commands.RegisterCommands<BasicCommands>();

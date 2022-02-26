@@ -22,14 +22,14 @@ namespace Bigotes.Commands
         /// <param name="url"></param>
         /// <returns></returns>
         [Command("play")]
-        [Description("Comando en progreso...")]
+        [Description("Comando para reproducir música (EN PROGRESO)")]
         public async Task Play(CommandContext ctx, [RemainingText]string url)
         {
             var lava = ctx.Client.GetLavalink();
 
             try
             {
-                //throw new Exception("Opción no implementada.");
+                throw new Exception("Opción no implementada.");
 
                 //Se conectará al canal de voz en el que se encuentra el usuario
                 await Join(ctx, lava, ctx.Member.VoiceState.Channel);

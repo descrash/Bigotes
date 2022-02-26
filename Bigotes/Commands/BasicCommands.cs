@@ -17,6 +17,60 @@ namespace Bigotes.Commands
     public class BasicCommands : BaseCommandModule
     {
         /// <summary>
+        /// Comando de ayuda personalizado
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("ayuda")]
+        [Description("Comando de ayuda de Bigotes.")]
+        public async Task Ayuda(CommandContext ctx)
+        {
+            try
+            {
+                string titulo = "PANEL DE AYUDA DE BIGOTES";
+
+                #region Descripción
+                List<string> descripcion = new List<string>();
+                descripcion.Add("El-bot-de-Discord-Bigotes-contiene-los-siguientes-comandos:");
+                descripcion.Add("Fui-provisto-de-múltiples-utilidades-tales-como-detección-de-anomalías-de-energía-provenientes-de-posibles-"
+                    + "amenazas-y-su-consiguiente-análisis.-Además,-tras-la-llegada-de-Yuubei-al-estupendo-Escuadrón-Fénix,-tuve-que-contar-con-"
+                    + "sistemas-de-ataque-y-defensa-en-caso-de-confrontamiento-de-tipo-3-o-mayor-en-la-escala-bélica.-Esto-se-puede-entender-como-"
+                    + "sistemas-explosivos-o-escudos-varios.-Mi-movilidad----- **[ERROR: DETECTADO COMPONENTE SOPORÍFERO Y EXCESO DE EXPLICACIÓN. ACTIVANDO RESUMEN]**");
+                descripcion.Add("Gracias-a-las-tecnologías-encontradas-en-esta-nueva-plataforma,-he-podido-contar-con-una-adaptación-en-lenguaje-"
+                    + "de-programación-CSharp.");
+                descripcion.Add("A-pesar-del-nivel-tan-obsoleto-de-la-tecnología-humana-y-dado-que-he-sido-programado-aquí-por-un-sylvari-de-estética-"
+                    + "con-sobrecarga-de-tonalidades-oscuras-y-una-druida-que-tiene-un-concepto-de-arreglo-de-errores-informáticos-muy-violento-"
+                    + "**[RECUPERADO FRAGMENTO DE MEMORIA, GRITO FEMENINO GRABADO: '¡Reacciona, puto cacharro!']**-siento-que-mi-nivel-de-efectividad-"
+                    + "no-pueda-ser-igual-a-mi-versión-golem-programada-por-la-fantástica-Yuubei.");
+                descripcion.Add("**[CARGANDO RECOMENDACIÓN FINAL]**-Espero-cumplir-con-mi-propósito-y-recomiendo-tomar-precauciones-con-las-galletas.");
+                #endregion
+
+
+                #region Creación de Embed
+                var presentacionEmbed = new DiscordEmbedBuilder
+                {
+                    Title = titulo,
+                    Description = string.Join("\n\n", descripcion),
+                    Color = DiscordColor.Red,
+                    //ImageUrl = Constantes.ICON_BIGOTES,
+                    Footer = new DiscordEmbedBuilder.EmbedFooter
+                    {
+                        Text = "Patrocinio de Zokab International S.L. (Actualmente en fase de pruebas)"
+                    },
+                    Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail
+                    {
+                        Url = Constantes.ICON_BIGOTES
+                    }
+                };
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx, ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Comando de saludo
         /// </summary>
         /// <param name="comCtx"></param>
