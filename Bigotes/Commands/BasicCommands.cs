@@ -23,6 +23,7 @@ namespace Bigotes.Commands
         /// <returns></returns>
         [Command("ayuda")]
         [Description("Comando de ayuda de Bigotes.")]
+        [Aliases("help", "ayúdame", "ayudame")]
         public async Task Ayuda(CommandContext ctx)
         {
             try
@@ -31,18 +32,17 @@ namespace Bigotes.Commands
 
                 #region Descripción
                 List<string> descripcion = new List<string>();
-                descripcion.Add("El-bot-de-Discord-Bigotes-contiene-los-siguientes-comandos:");
-                descripcion.Add("Fui-provisto-de-múltiples-utilidades-tales-como-detección-de-anomalías-de-energía-provenientes-de-posibles-"
-                    + "amenazas-y-su-consiguiente-análisis.-Además,-tras-la-llegada-de-Yuubei-al-estupendo-Escuadrón-Fénix,-tuve-que-contar-con-"
-                    + "sistemas-de-ataque-y-defensa-en-caso-de-confrontamiento-de-tipo-3-o-mayor-en-la-escala-bélica.-Esto-se-puede-entender-como-"
-                    + "sistemas-explosivos-o-escudos-varios.-Mi-movilidad----- **[ERROR: DETECTADO COMPONENTE SOPORÍFERO Y EXCESO DE EXPLICACIÓN. ACTIVANDO RESUMEN]**");
-                descripcion.Add("Gracias-a-las-tecnologías-encontradas-en-esta-nueva-plataforma,-he-podido-contar-con-una-adaptación-en-lenguaje-"
-                    + "de-programación-CSharp.");
-                descripcion.Add("A-pesar-del-nivel-tan-obsoleto-de-la-tecnología-humana-y-dado-que-he-sido-programado-aquí-por-un-sylvari-de-estética-"
-                    + "con-sobrecarga-de-tonalidades-oscuras-y-una-druida-que-tiene-un-concepto-de-arreglo-de-errores-informáticos-muy-violento-"
-                    + "**[RECUPERADO FRAGMENTO DE MEMORIA, GRITO FEMENINO GRABADO: '¡Reacciona, puto cacharro!']**-siento-que-mi-nivel-de-efectividad-"
-                    + "no-pueda-ser-igual-a-mi-versión-golem-programada-por-la-fantástica-Yuubei.");
-                descripcion.Add("**[CARGANDO RECOMENDACIÓN FINAL]**-Espero-cumplir-con-mi-propósito-y-recomiendo-tomar-precauciones-con-las-galletas.");
+                string _cmdDescripcion = String.Empty;
+                descripcion.Add("Bienvenidos-al-panel-de-ayuda-de-BIGOTES. A-continuación-se-muestra-la-lista-de-comandos-para-la-correcta-utilización. Para-más-detalle, contactar-con-el-desarrollador-principal.\n");
+
+                foreach (var cmd in ctx.Client.GetCommandsNext().RegisteredCommands)
+                {
+                    if (!cmd.Value.Description.Equals(_cmdDescripcion))
+                    {
+                        descripcion.Add($"  :information_source: - **{cmd.Key}**: {cmd.Value.Description}");
+                        _cmdDescripcion = cmd.Value.Description;
+                    }
+                }
                 #endregion
 
 
@@ -50,8 +50,8 @@ namespace Bigotes.Commands
                 var presentacionEmbed = new DiscordEmbedBuilder
                 {
                     Title = titulo,
-                    Description = string.Join("\n\n", descripcion),
-                    Color = DiscordColor.Red,
+                    Description = string.Join("\n", descripcion),
+                    Color = DiscordColor.CornflowerBlue,
                     //ImageUrl = Constantes.ICON_BIGOTES,
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
@@ -63,6 +63,8 @@ namespace Bigotes.Commands
                     }
                 };
                 #endregion
+
+                await ctx.Channel.SendMessageAsync(embed: presentacionEmbed).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -123,43 +125,6 @@ namespace Bigotes.Commands
         }
 
         /// <summary>
-        /// Comando para pedir galletas.
-        /// En caso de que sea Gambita el que lo haga, cambiar la respuesta
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <returns></returns>
-        [Command("galletas")]
-        [Description("¡CUIDADO! Utilizar este comando con responsabilidad.")]
-        public async Task Cookies(CommandContext ctx)
-        {
-            try
-            {
-                if (ctx.User.Username == "Gombut")
-                {
-                    await ctx.Channel.SendMessageAsync("`ERROR: CARGANDO ADVERTENCIA...` ```Según-artículo-223.45-del-reglamento-del-Pacto-contra-el-abuso-de-dulces-y-galletas, "
-                        + "queda-totalmente-prohibida-la-entrega-de-más-gallegas-a-la-Cruzada-Yuubei-por-problemas-de-salud-y-riesgo-para-la-seguridad-de-Tyria.```").ConfigureAwait(false);
-                }
-                else
-                {
-                    var msg = ctx.Message;
-                    var cookie = DiscordEmoji.FromUnicode(ctx.Client, "🍪");
-                    await msg.CreateReactionAsync(cookie).ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                await Error.MostrarError(ctx, ex.Message);
-            }
-        }
-
-        [Command("galleta")]
-        [Description("¡CUIDADO! Utilizar este comando con responsabilidad.")]
-        public async Task Cookie(CommandContext ctx)
-        {
-            await Cookies(ctx);
-        }
-
-        /// <summary>
         /// Comando para solicitar algo
         /// </summary>
         /// <param name="ctx"></param>
@@ -175,13 +140,21 @@ namespace Bigotes.Commands
                 {
                     case "una galleta":
                     case "galletas":
-                        await Cookies(ctx);
+                        if (ctx.User.Username == "Gombut")
+                        {
+                            await ctx.Channel.SendMessageAsync("`ERROR: CARGANDO ADVERTENCIA...` ```Según-artículo-223.45-del-reglamento-del-Pacto-contra-el-abuso-de-dulces-y-galletas, "
+                                + "queda-totalmente-prohibida-la-entrega-de-más-gallegas-a-la-Cruzada-Yuubei-por-problemas-de-salud-y-riesgo-para-la-seguridad-de-Tyria.```").ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            var cookie = DiscordEmoji.FromUnicode(ctx.Client, "🍪");
+                            await ctx.Message.CreateReactionAsync(cookie).ConfigureAwait(false);
+                        }
                         break;
 
                     case "un abrazo":
-                        var msg = ctx.Message;
                         var hug = DiscordEmoji.FromName(ctx.Client, ":people_hugging:");
-                        await msg.CreateReactionAsync(hug).ConfigureAwait(false);
+                        await ctx.Message.CreateReactionAsync(hug).ConfigureAwait(false);
                         break;
 
                     case "la razón":
@@ -291,8 +264,9 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <param name="eres"></param>
         /// <returns></returns>
-        [Command("¿qué")]
+        [Command("qué")]
         [Description("Pregunta a Bigotes qué hora es, qué día es (en calendario Mouveliano, es decir, del GW2), qué tiempo hace, qué ES 'término' (p.ej.: '¿qué es quaggan?')")]
+        [Aliases("que", "¿qué", "¿que")]
         public async Task Que(CommandContext ctx, [Description("Continuación de la pregunta...")][RemainingText]string pregunta)
         {
             try
@@ -326,20 +300,6 @@ namespace Bigotes.Commands
                 {
                     await ctx.Channel.SendMessageAsync(Consultas.QueEs(pregunta, ctx));
                 }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        [Command("qué")]
-        [Description("Pregunta a Bigotes qué hora es, qué día es (en calendario Mouveliano, es decir, del GW2), qué tiempo hace, qué ES 'término' (p.ej.: '¿qué es quaggan?')")]
-        public async Task QueSinInterrogante(CommandContext ctx, [RemainingText]string pregunta)
-        {
-            try
-            {
-                await Que(ctx, pregunta);
             }
             catch (Exception ex)
             {

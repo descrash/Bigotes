@@ -110,11 +110,10 @@ namespace Bigotes
                     EnableDms = false,
                     EnableMentionPrefix = true,
                     IgnoreExtraArguments = true,
-                    //EnableDefaultHelp = false, <- ASEGURARSE DE TENER COMANDO DE AYUDA PROPIO
+                    EnableDefaultHelp = false //<- ASEGURARSE DE TENER COMANDO DE AYUDA PROPIO
                 };
 
                 Commands = Client.UseCommandsNext(commandsConfig);
-                Commands.SetHelpFormatter<CustomHelpFormatter>();
 
                 #region Registro de comandos
                 Commands.RegisterCommands<BasicCommands>();
