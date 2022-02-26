@@ -85,7 +85,6 @@ namespace Bigotes.Commands
             }
         }
 
-        [Command]
         public async Task Leave(CommandContext ctx, DiscordChannel channel)
         {
             var lava = ctx.Client.GetLavalink();

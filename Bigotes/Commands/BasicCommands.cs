@@ -153,6 +153,7 @@ namespace Bigotes.Commands
         }
 
         [Command("galleta")]
+        [Description("¡CUIDADO! Utilizar este comando con responsabilidad.")]
         public async Task Cookie(CommandContext ctx)
         {
             await Cookies(ctx);
@@ -333,6 +334,7 @@ namespace Bigotes.Commands
         }
 
         [Command("qué")]
+        [Description("Pregunta a Bigotes qué hora es, qué día es (en calendario Mouveliano, es decir, del GW2), qué tiempo hace, qué ES 'término' (p.ej.: '¿qué es quaggan?')")]
         public async Task QueSinInterrogante(CommandContext ctx, [RemainingText]string pregunta)
         {
             try

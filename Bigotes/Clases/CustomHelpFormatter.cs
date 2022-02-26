@@ -11,7 +11,36 @@ namespace Bigotes.Clases
 {
     public class CustomHelpFormatter : DefaultHelpFormatter
     {
-        public CustomHelpFormatter(CommandContext ctx) : base(ctx) { }
+        #region Atributos
+        protected DiscordEmbedBuilder _embed;
+        protected StringBuilder _strBuilder;
+        #endregion
+
+        #region Métodos
+        public CustomHelpFormatter(CommandContext ctx) : base(ctx)
+        {
+            _embed = new DiscordEmbedBuilder();
+            _strBuilder = new StringBuilder();
+        }
+
+        public override BaseHelpFormatter WithCommand(Command command)
+        {
+            _embed.AddField(command.Name, command.Description);
+            _strBuilder.AppendLine($"{command.Name} - {command.Description}");
+
+            return this;
+        }
+
+        public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
+        {
+            foreach (var cmd in cmds)
+            {
+                _embed.AddField(cmd.Name, cmd.Description);
+                _strBuilder.AppendLine($"**{cmd.Name}** - {cmd.Description}");
+            }
+
+            return this;
+        }
 
         public override CommandHelpMessage Build()
         {
@@ -31,5 +60,6 @@ namespace Bigotes.Clases
             };
             return base.Build();
         }
+        #endregion
     }
 }
