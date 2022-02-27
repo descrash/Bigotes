@@ -19,8 +19,8 @@ namespace Bigotes.Util
         public static string QueEs(string es, CommandContext ctx)
         {
             #region Propiedades
-            string answer = "`EXTRAYENDO FRAGMENTO DE LA BASE DE DATOS DE RATA SUM` ";
-            string resultado = String.Empty;
+            string answer = "`EXTRAYENDO FRAGMENTO DE LA BASE DE DATOS DE RATA SUM. AVISO: UTILIDAD EN PRUEBAS` ";
+            string pagContent = String.Empty;
             string parrafoFinal = String.Empty;
             string url = Constantes.WIKI_GW2;
             string busqueda = es.Substring(3);
@@ -34,12 +34,12 @@ namespace Bigotes.Util
                 using (WebClient client = new WebClient())
                 {
                     client.Headers.Add("User-Agent: Other");
-                    resultado = client.DownloadString(url + busqueda);
+                    pagContent = client.DownloadString(url + busqueda);
                 }
 
                 String[] separadoresParrafo = { "<p>", "</p>" };
 
-                answer += "```" + Regex.Replace(resultado.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1], "<.*?>", String.Empty).Replace(' ', '-') + "```";
+                answer += "```" + Regex.Replace(pagContent.Split(separadoresParrafo, StringSplitOptions.RemoveEmptyEntries)[1], "<.*?>", String.Empty).Replace(' ', '-') + "```";
                 //+ "Fuente: " + url + busqueda).ConfigureAwait(false);
             }
             catch (Exception ex)
