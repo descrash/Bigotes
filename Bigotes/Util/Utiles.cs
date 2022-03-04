@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using Bigotes.Clases;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
@@ -54,6 +55,22 @@ namespace Bigotes.Util
         /// Lista de roles asignables por los usuarios.
         /// </summary>
         public static List<DiscordRole> rolesAsignables = new List<DiscordRole>();
+
+        /// <summary>
+        /// Lista de estados de la Playlist
+        /// </summary>
+        public enum PlaylistStatus
+        {
+            NOT_FOUND,
+            PLAYING,
+            PAUSE
+        }
+
+        /// <summary>
+        /// Lista de playlists que se diferenciarán en función del servidor en el que hayan sido solicitadas
+        /// para evitar solapamientos...
+        /// </summary>
+        public static List<MusicPlaylist> listaPlaylists = new List<MusicPlaylist>();
         #endregion
 
         #region Métodos

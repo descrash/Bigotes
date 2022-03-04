@@ -126,7 +126,7 @@ namespace Bigotes
 
                 await Client.ConnectAsync(new DiscordActivity("'Bigotes, ayuda'", ActivityType.ListeningTo));
 
-                //TODO: Arreglar la conexión a Lavalink
+                //Conexión a lavalink
                 await lavalink.ConnectAsync(lavalinkConfig);
 
                 //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
