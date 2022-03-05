@@ -32,7 +32,7 @@ namespace Bigotes.Commands
             {
                 msg = "`[CARGANDO MENSAJE DE ERROR]` ```Error-en-ejecución-de-comando.``` `[CARGANDO SUGERENCIA]` ```Por-favor,-utilice-el-formato-00d00-sumando-de-cero-a-infinito-añadidos).```";
             }
-            else if (output.Last() == "Resultado: [1]")
+            else if (output.Last() == "[1]" && output.Count == 1)
             {
                 msg = "`[CARGANDO RESULTADO: " + output.First() + ", DESASTROSO]` ```Resultado: [PIFIA]``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.``` `[CARGANDO GRABACIÓN DE VOZ DE MURETHOR]` ```[S'a matao Paco]```";
             }

@@ -110,18 +110,17 @@ namespace Bigotes.Util
                             int resultado = rand.Next(1, diceRoll[i]);
                             diceValue[i] += resultado;
 
-                            if (resultado == 1)
+                            if (diceNumber[i] == 1 && resultado == 1)
                             {
                                 //Recogemos la pifia para su comprobación
                                 diceValue[i] = resultado;
                                 hayPifia = true;
-                                RESULTADOS.Add("[PIFIA]");
                             }
                             else
                             {
                                 hayPifia = false;
-                                RESULTADOS.Add("[" + resultado + "]");
                             }
+                            RESULTADOS.Add("[" + resultado + "]");
                         }
                     }
                     else
