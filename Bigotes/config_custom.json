@@ -1,3 +1,4 @@
+//Cambiar nombre de este archivo a config.json y poner la Token correspondiente
 {
   "token": "YOUR TOKEN HERE",
   "prefix": "Bigotes, "
