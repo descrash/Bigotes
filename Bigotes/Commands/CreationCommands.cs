@@ -726,6 +726,7 @@ namespace Bigotes.Commands
                 while (!DateTime.TryParse(dateMSG.Result.Content, out fechaAux))
                 {
                     await ctx.Channel.SendMessageAsync("`[ERROR]` ```Formato-incorrecto. Recomendado-formato-coherente-dd/mm/yyyy hh:mm").ConfigureAwait(false);
+                    dateMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
                 }
 
                 nuevoEvento.fecha = fechaAux;
