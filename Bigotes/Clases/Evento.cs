@@ -11,7 +11,7 @@ namespace Bigotes.Clases
         public string nombre { get; set; }
         public string descripcion { get; set; }
         public List<string> narradores { get; set; }
-        public DateTime fecha { get; set; }
+        public string fecha { get; set; }
         public string lugar { get; set; }
         public List<string> participantes { get; set; }
         #endregion
@@ -35,15 +35,13 @@ namespace Bigotes.Clases
             {
                 participantesSTR += $" {_p}";
             }
-
-            string fechaSTR = $"{fecha.Day} de {System.Globalization.CultureInfo.GetCultureInfo("es-ES").DateTimeFormat.GetMonthName(fecha.Month)}, a las {fecha.ToString("HH")}:{fecha.ToString("mm")}";
             #endregion
 
             try
             {
                 evento.Append($"**Nombre del evento**: *{nombre}*\n");
                 evento.Append($"**Narrador{pluralN}**:{narradoresSTR}\n");
-                evento.Append($"**Fecha y hora**: *{fechaSTR}*\n");
+                evento.Append($"**Fecha y hora**: *{fecha}*\n");
                 evento.Append($"**Lugar**: *{lugar}*\n");
                 evento.Append($"**Participante{pluralP}**:{participantesSTR}\n\n");
                 evento.Append($"**Resumen**: *{descripcion}*");

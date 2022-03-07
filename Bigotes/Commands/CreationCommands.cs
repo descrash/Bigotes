@@ -717,19 +717,9 @@ namespace Bigotes.Commands
                 nuevoEvento.descripcion = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
                 #endregion
 
-                //REVISAR FECHA Y HORA EN PRUEBAS
                 #region Fecha y hora
-                await ctx.Channel.SendMessageAsync("```Concretar-fecha-y-hora-de-realización-con-formato-dd/mm/yyyy hh:mm:```").ConfigureAwait(false);
-                DateTime fechaAux = new DateTime();
-
-                var dateMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-                while (!DateTime.TryParse(dateMSG.Result.Content, out fechaAux))
-                {
-                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Formato-incorrecto. Recomendado-formato-coherente-dd/mm/yyyy hh:mm").ConfigureAwait(false);
-                    dateMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-                }
-
-                nuevoEvento.fecha = fechaAux;
+                await ctx.Channel.SendMessageAsync("```Concretar-fecha-y-hora-de-realización. Texto-libre:```").ConfigureAwait(false);
+                nuevoEvento.fecha = (await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false)).Result.Content;
                 #endregion
 
                 #region Lugar
