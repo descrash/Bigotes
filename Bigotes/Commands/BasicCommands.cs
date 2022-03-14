@@ -322,6 +322,8 @@ namespace Bigotes.Commands
                 {
                     throw new Exception("No se encuentra canal con nombre #frases celebres.");
                 }
+                
+                var sentMSG = await ctx.Channel.SendMessageAsync("`CARGANDO...` ```Seleccionando-frase. Espere...```").ConfigureAwait(false);
 
                 DiscordChannel channel = ctx.Guild.Channels.Where(x => x.Value.Name == "frases-celebres").First().Value;
                 var msgs = await channel.GetMessagesAsync(9000);
@@ -345,6 +347,7 @@ namespace Bigotes.Commands
                             Color = DiscordColor.Rose
                         };
 
+                        await sentMSG.DeleteAsync().ConfigureAwait(false);
                         await ctx.Channel.SendMessageAsync(embed: embedBuilderWithAttachment).ConfigureAwait(false);
                     }
                 }
