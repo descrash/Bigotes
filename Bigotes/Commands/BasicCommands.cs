@@ -303,7 +303,67 @@ namespace Bigotes.Commands
             }
             catch (Exception ex)
             {
-                throw ex;
+                await Error.MostrarError(ctx, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Comando para pedir una frase de FRASES CÉLEBRES
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("frase")]
+        [Description("Comando para mostrar un mensaje aleatorio del canal #frases-celebres.")]
+        public async Task Frase(CommandContext ctx)
+        {
+            try
+            {
+                if (ctx.Guild.Channels.Where(x => x.Value.Name == "frases-celebres").Count() == 0)
+                {
+                    throw new Exception("No se encuentra canal con nombre #frases celebres.");
+                }
+
+                DiscordChannel channel = ctx.Guild.Channels.Where(x => x.Value.Name == "frases-celebres").First().Value;
+                var msgs = await channel.GetMessagesAsync(9000);
+                var rand = new Random();
+                
+                var frase = msgs.OrderBy(x => rand.Next()).Take(1).First();
+
+                //Comprobamos si el mensaje tiene imágenes adjuntas. En ese caso,
+                //se deberán crear VARIOS embebidos (uno por imagen). El problema de
+                //los adjuntos es que en DiscordMessageBuilder sólo contempla adjuntar
+                //un FICHERO de tipo Stream y el embebido sólo acepta UNA imagen por vez.
+                if (frase.Attachments.Count() > 0)
+                {
+                    foreach (var _att in frase.Attachments)
+                    {
+                        DiscordEmbedBuilder embedBuilderWithAttachment = new DiscordEmbedBuilder
+                        {
+                            Title = $"Frase-subida-por-{frase.Author.Username}",
+                            Description = frase.Content,
+                            ImageUrl = _att.Url,
+                            Color = DiscordColor.Rose
+                        };
+
+                        await ctx.Channel.SendMessageAsync(embed: embedBuilderWithAttachment).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder
+                    {
+                        Title = $"Frase-subida-por-{frase.Author.Username}",
+                        Description = frase.Content,
+                        Color = DiscordColor.Rose
+                    };
+
+                    await ctx.Channel.SendMessageAsync(embed: embedBuilder).ConfigureAwait(false);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx, ex.Message);
             }
         }
 
