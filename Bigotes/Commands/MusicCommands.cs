@@ -180,6 +180,7 @@ namespace Bigotes.Commands
                 }
                 else
                 {
+                    _mpl.playList.Remove(_mpl.playList.First());
                     var firstTrack = _mpl.playList.First();
                     var loadResult = await _mpl.connection.Node.Rest.GetTracksAsync($"{firstTrack.Name} {firstTrack.Author}");    
                     if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
@@ -207,6 +208,10 @@ namespace Bigotes.Commands
         {
             try
             {
+                #region Comprobación de que el usuario se encuentra en un canal de voz
+                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                #endregion
+
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
 
                 if (_mpl == null || _mpl.estado != Utiles.PlaylistStatus.PLAYING)
@@ -241,6 +246,10 @@ namespace Bigotes.Commands
         {
             try
             {
+                #region Comprobación de que el usuario se encuentra en un canal de voz
+                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                #endregion
+
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
 
                 if (_mpl == null || _mpl.estado != Utiles.PlaylistStatus.PAUSE)
@@ -275,6 +284,10 @@ namespace Bigotes.Commands
         {
             try
             {
+                #region Comprobación de que el usuario se encuentra en un canal de voz
+                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                #endregion
+
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
 
                 if (_mpl == null)
@@ -292,17 +305,6 @@ namespace Bigotes.Commands
                     //Utiles.listaPlaylists.Remove(_mpl);
                     _mpl.textTriggerChannel = ctx.Channel;
                     await _mpl.connection.StopAsync();
-                    _mpl.playList.Remove(_mpl.playList.First());
-                    //Utiles.listaPlaylists.Add(_mpl);
-                    //var firstTrack = _mpl.playList.First();
-                    //var loadResult = await _mpl.connection.Node.Rest.GetTracksAsync($"{firstTrack.Name} {firstTrack.Author}");
-                    //if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
-                    //{
-                    //    throw new Exception($"Error al reproducir la pista: {firstTrack.Name} de {firstTrack.Author}.");
-                    //}
-                    //await _mpl.connection.PlayAsync(loadResult.Tracks.First());
-                    //Utiles.listaPlaylists.Add(_mpl);
-                    //await ctx.Channel.SendMessageAsync($"`[REPRODUCIENDO]` ```{firstTrack.Name}, de-{firstTrack.Author}```").ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
