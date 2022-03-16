@@ -38,12 +38,12 @@ namespace Bigotes.Commands
 
             try
             {
-                throw new Exception("Opción no implementada.");
+                //throw new Exception("Opción no implementada.");
 
                 await ctx.Channel.SendMessageAsync("`[AVISO]` ```Los-métodos-de-reproducción-de-música-se-encuentran-en-período-de-pruebas. Podría-no-funcionar-correctamente.```").ConfigureAwait(false);
 
                 #region 1. Comprobación de que el usuario se encuentra en un canal de voz
-                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
                 #endregion
 
                 #region 2. Conexión de Lavalink y obtención de propiedades de la Guild (servidor)
@@ -96,12 +96,13 @@ namespace Bigotes.Commands
                         //Es una playlist
                         var playlistID = querySubSTR[4];
                         var playlist = await Utiles.spotifyClient.Playlists.Get(playlistID);
+                        //Añadimos la playlist a la lista
                         foreach (var _track in playlist.Tracks.Items)
                         {
                             var fullTrack = (SpotifyAPI.Web.FullTrack)_track.Track;
                             _mpl.playList.Add(new MusicTrack(fullTrack.Name, fullTrack.Artists.First().Name, fullTrack.PreviewUrl));
                         }
-                        //Añadimos la playlist a la lista
+                        await ctx.Channel.SendMessageAsync($"```Añadidas-{playlist.Tracks.Items.Count}-canciones-a-la-cola-de-reproducción.```");
                     }
                     else
                     {
@@ -110,7 +111,7 @@ namespace Bigotes.Commands
                         var track = await Utiles.spotifyClient.Tracks.Get(trackID);
                         _mpl.playList.Add(new MusicTrack(track.Name, track.Artists.First().Name, track.PreviewUrl));
                         //Añadimos la canción a la lista
-                        await ctx.Channel.SendMessageAsync($"Añadida-{track.Name}-de-{track.Artists.First().Name}-a-la-cola-de-reproducción.");
+                        await ctx.Channel.SendMessageAsync($"```Añadida-{track.Name}-de-{track.Artists.First().Name}-a-la-cola-de-reproducción.```");
                     }
                 }
                 else
@@ -118,18 +119,18 @@ namespace Bigotes.Commands
                     loadResult = await node.Rest.GetTracksAsync(query);      
                     if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
                     {
-                        throw new Exception($"Error. La búsqueda no ha encontrado ninguna pista con estas características: {query}.");
+                        throw new Exception($"La búsqueda no ha encontrado ninguna pista con estas características: {query}.");
                     }
 
                     playableTrack = loadResult.Tracks.First();
                     _mpl.playList.Add(new MusicTrack(playableTrack.Title, playableTrack.Author, playableTrack.Uri.ToString()));
 
-                    await ctx.Channel.SendMessageAsync($"Añadida-{playableTrack.Title}-de-{playableTrack.Author}-a-la-cola-de-reproducción.");
+                    await ctx.Channel.SendMessageAsync($"```Añadida-{playableTrack.Title}-de-{playableTrack.Author}-a-la-cola-de-reproducción.```");
                 }
                 #endregion
 
-                #region 6. En caso de no haber nada reproduciendo anteriormente, se procederá a su reproducción
-                do
+                #region 6. En caso de no haber nada reproduciendo, se procederá a su reproducción
+                while (!currentlyPlaying && _mpl.playList.Count > 0)
                 {
                     var firstTrack = _mpl.playList.First();
                     loadResult = await node.Rest.GetTracksAsync($"{firstTrack.Name} {firstTrack.Author}");
@@ -146,7 +147,7 @@ namespace Bigotes.Commands
                         _mpl.connection.PlaybackFinished += PistaTerminada;
                         await ctx.Channel.SendMessageAsync($"`[REPRODUCIENDO]` ```{firstTrack.Name}, de-{firstTrack.Author}```").ConfigureAwait(false);
                     }
-                } while (!currentlyPlaying && _mpl.playList.Count > 0);
+                }
 
                 if (currentlyPlaying)
                 {
@@ -209,7 +210,7 @@ namespace Bigotes.Commands
             try
             {
                 #region Comprobación de que el usuario se encuentra en un canal de voz
-                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
                 #endregion
 
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
@@ -221,6 +222,10 @@ namespace Bigotes.Commands
                 }
                 else
                 {
+                    #region Comprobación de que el usuario está en el mismo canal de voz
+                    if (_mpl.connection.Channel != ctx.Member.VoiceState.Channel) throw new Exception("Para usar este comando, se ha de estar conectado al mismo canal de voz.");
+                    #endregion
+
                     Utiles.listaPlaylists.Remove(_mpl);
                     await _mpl.connection.PauseAsync();
                     _mpl.estado = Utiles.PlaylistStatus.PAUSE;
@@ -247,7 +252,7 @@ namespace Bigotes.Commands
             try
             {
                 #region Comprobación de que el usuario se encuentra en un canal de voz
-                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
                 #endregion
 
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
@@ -259,6 +264,10 @@ namespace Bigotes.Commands
                 }
                 else
                 {
+                    #region Comprobación de que el usuario está en el mismo canal de voz
+                    if (_mpl.connection.Channel != ctx.Member.VoiceState.Channel) throw new Exception("Para usar este comando, se ha de estar conectado al mismo canal de voz.");
+                    #endregion
+
                     Utiles.listaPlaylists.Remove(_mpl);
                     await _mpl.connection.ResumeAsync();
                     _mpl.estado = Utiles.PlaylistStatus.PLAYING;
@@ -285,7 +294,7 @@ namespace Bigotes.Commands
             try
             {
                 #region Comprobación de que el usuario se encuentra en un canal de voz
-                if (ctx.Member.VoiceState.Channel == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
                 #endregion
 
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
@@ -295,16 +304,113 @@ namespace Bigotes.Commands
                     //La lista está vacía
                     throw new Exception("No estoy reproduciendo en este momento.");
                 }
-                else if (_mpl.playList.Count == 1)
-                {
-                    //No hay más canciones después
-                    throw new Exception("Es la última canción de la cola.");
-                }
                 else
                 {
+                    #region Comprobación de que el usuario está en el mismo canal de voz
+                    if (_mpl.connection.Channel != ctx.Member.VoiceState.Channel) throw new Exception("Para usar este comando, se ha de estar conectado al mismo canal de voz.");
+                    #endregion
+
+                    //No hay más canciones después
+                    if (_mpl.playList.Count == 1) throw new Exception("Es la última canción de la cola.");
+
                     //Utiles.listaPlaylists.Remove(_mpl);
                     _mpl.textTriggerChannel = ctx.Channel;
                     await _mpl.connection.StopAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx.Channel, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Comando para mostrar las diez primeras canciones de la cola en reproducción
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("queue")]
+        [Description("Comando para mostrar las diez primeras canciones de la cola en reproducción.")]
+        public async Task Queue(CommandContext ctx)
+        {
+            try
+            {
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
+
+                if (_mpl == null)
+                {
+                    //La lista está vacía
+                    throw new Exception("No estoy reproduciendo en este momento.");
+                }
+                else
+                {
+                    StringBuilder queue = new StringBuilder();
+
+                    for (int i = 0; i < _mpl.playList.Count() && i < 10; i++)
+                    {
+                        queue.Append($"**{i+1}.** {_mpl.playList[i].Name}, de {_mpl.playList[i].Author}\n");
+                    }
+
+                    if (_mpl.playList.Count() > 10)
+                    {
+                        queue.Append($"*... y {_mpl.playList.Count() - 10} más...*\n");
+                    }
+
+                    var embedQueue = new DiscordEmbedBuilder
+                    {
+                        Title = "LISTA-DE-REPRODUCCIÓN-ACTUAL",
+                        Description = queue.ToString(),
+                        Color = DiscordColor.DarkGreen
+                    };
+
+                    await ctx.Channel.SendMessageAsync(embed: embedQueue).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx.Channel, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Comando para mezclar la cola de canciones
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("shuffle")]
+        [Description("Comando para mezclar la cola en reproducción.")]
+        public async Task Shuffle(CommandContext ctx)
+        {
+            try
+            {
+                #region Comprobación de que el usuario se encuentra en un canal de voz
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                #endregion
+
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
+
+                if (_mpl == null)
+                {
+                    //La lista está vacía
+                    throw new Exception("No estoy reproduciendo en este momento.");
+                }
+                else
+                {
+                    #region Comprobación de que el usuario está en el mismo canal de voz
+                    if (_mpl.connection.Channel != ctx.Member.VoiceState.Channel) throw new Exception("Para usar este comando, se ha de estar conectado al mismo canal de voz.");
+                    #endregion
+
+                    if (_mpl.playList.Count() == 1) throw new Exception("Pero si sólo hay una canción...");
+
+                    var rand = new Random();
+                    Utiles.listaPlaylists.Remove(_mpl);
+                    var firstTrack = _mpl.playList.First();
+                    
+                    _mpl.playList = _mpl.playList.OrderBy(x => rand.Next()).ToList<MusicTrack>();
+
+                    Utiles.listaPlaylists.Add(_mpl);
+
+                    await ctx.Channel.SendMessageAsync("```Lista-mezclada.```").ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
