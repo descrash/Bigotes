@@ -1,7 +1,8 @@
 //Cambiar nombre de este archivo a config.json y poner la Token correspondiente
+//NOTA: Al hacer Debug o Release, hay que copiar el config.json a la carpeta correspondiente (bin/Debug o bin/Release)
 {
   "token": "YOUR TOKEN HERE",
   "prefix": "Bigotes, ",
   "spotifyClientID": "YOUR SPOTIFY API CLIENT ID",
-  "spotifyClientSecret":  "YOUR SPOTIFY API SECRET CLIENT ID"
+  "spotifyClientSecret": "YOUR SPOTIFY API SECRET CLIENT ID"
 }

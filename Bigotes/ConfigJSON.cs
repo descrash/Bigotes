@@ -15,5 +15,11 @@ namespace Bigotes
 
         [JsonProperty("prefix")]
         public string Prefix { get; private set; }
+
+        [JsonProperty("spotifyClientID")]
+        public string SpotifyClient { get; private set; }
+
+        [JsonProperty("spotifyClientSecret")]
+        public string SpotifySecretClient { get; private set; }
     }
 }

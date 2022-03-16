@@ -108,7 +108,7 @@ namespace Bigotes.Commands
             }
             catch (Exception ex)
             {
-                await Error.MostrarError(ctx, ex.Message);
+                await Error.MostrarError(ctx.Channel, ex.Message);
             }
         }
 
@@ -272,7 +272,7 @@ namespace Bigotes.Commands
             }
             catch (Exception ex)
             {
-                await Error.MostrarError(ctx, ex.Message);
+                await Error.MostrarError(ctx.Channel, ex.Message);
             }
         }
 
@@ -698,7 +698,7 @@ namespace Bigotes.Commands
             }
             catch (Exception ex)
             {
-                await Error.MostrarError(ctx, ex.Message);
+                await Error.MostrarError(ctx.Channel, ex.Message);
             }
         }
 
@@ -760,7 +760,7 @@ namespace Bigotes.Commands
             }
             catch (Exception ex)
             {
-                await Error.MostrarError(ctx, ex.Message);
+                await Error.MostrarError(ctx.Channel, ex.Message);
             }
         }
     }

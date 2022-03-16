@@ -1,6 +1,7 @@
 ﻿using Bigotes.Clases;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -55,6 +56,11 @@ namespace Bigotes.Util
         /// Lista de roles asignables por los usuarios.
         /// </summary>
         public static List<DiscordRole> rolesAsignables = new List<DiscordRole>();
+
+        /// <summary>
+        /// Cliente de Spotify para la autenticación y gestión de música
+        /// </summary>
+        public static SpotifyClient spotifyClient;
 
         /// <summary>
         /// Lista de estados de la Playlist

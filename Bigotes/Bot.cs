@@ -15,6 +15,7 @@ using DSharpPlus.Net;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Entities;
 using Bigotes.Clases;
+using SpotifyAPI.Web;
 
 namespace Bigotes
 {
@@ -89,6 +90,16 @@ namespace Bigotes
                 };
 
                 var lavalink = Client.UseLavalink();
+                #endregion
+
+                #region Configuración de Spotify
+                //SpotifyAPI-NET necesita crear su propio archivo de configuración y cliente OAuth para las credenciales
+                var spotiConfig = SpotifyClientConfig.CreateDefault();
+
+                var request = new ClientCredentialsRequest(ConfigJson.SpotifyClient, ConfigJson.SpotifySecretClient);
+                var response = await new OAuthClient(spotiConfig).RequestToken(request);
+
+                Util.Utiles.spotifyClient = new SpotifyClient(spotiConfig.WithToken(response.AccessToken));
                 #endregion
 
                 Client.Ready += OnClientReady;
