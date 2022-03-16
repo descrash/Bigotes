@@ -1,5 +1,7 @@
 //Cambiar nombre de este archivo a config.json y poner la Token correspondiente
 {
   "token": "YOUR TOKEN HERE",
-  "prefix": "Bigotes, "
+  "prefix": "Bigotes, ",
+  "spotifyClientID": "YOUR SPOTIFY API CLIENT ID",
+  "spotifyClientSecret":  "YOUR SPOTIFY API SECRET CLIENT ID"
 }
