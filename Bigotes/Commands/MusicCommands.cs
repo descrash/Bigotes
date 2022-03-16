@@ -38,7 +38,7 @@ namespace Bigotes.Commands
 
             try
             {
-                //throw new Exception("Opción no implementada.");
+                throw new Exception("Opción no implementada.");
 
                 await ctx.Channel.SendMessageAsync("`[AVISO]` ```Los-métodos-de-reproducción-de-música-se-encuentran-en-período-de-pruebas. Podría-no-funcionar-correctamente.```").ConfigureAwait(false);
 
