@@ -195,10 +195,11 @@ namespace Bigotes.Commands
         {
             try
             {
-                _mpl = Utiles.listaPlaylists.Where(x => x.guild == sender.Guild).First();
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == sender.Guild).FirstOrDefault();
                 if (_mpl.playList.Count == 0)
                 {
                     Utiles.listaPlaylists.Remove(_mpl);
+                    await _mpl.textTriggerChannel.SendMessageAsync($"```Reproducción-terminada.```").ConfigureAwait(false);
                     await _mpl.connection.DisconnectAsync().ConfigureAwait(false);
                 }
                 else
@@ -297,6 +298,29 @@ namespace Bigotes.Commands
                     Utiles.listaPlaylists.Add(_mpl);
                     await ctx.Channel.SendMessageAsync("```Música-reanudada.```").ConfigureAwait(false);
                 }
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx.Channel, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Comando para parar la música
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("stop")]
+        [Description("Comando para parar de reproducir la música y vaciar la lista...")]
+        public async Task Stop(CommandContext ctx)
+        {
+            try
+            {
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).First();
+                Utiles.listaPlaylists.Remove(_mpl);
+                _mpl.playList = new List<MusicTrack>();
+                Utiles.listaPlaylists.Add(_mpl);
+                await _mpl.connection.StopAsync();
             }
             catch (Exception ex)
             {
@@ -429,6 +453,7 @@ namespace Bigotes.Commands
                     var firstTrack = _mpl.playList.First();
                     
                     _mpl.playList = _mpl.playList.OrderBy(x => rand.Next()).ToList<MusicTrack>();
+                    _mpl.playList.Remove(firstTrack); //Borrar la primera pista para no repetirla
 
                     Utiles.listaPlaylists.Add(_mpl);
 
@@ -441,24 +466,25 @@ namespace Bigotes.Commands
             }
         }
 
-        public async Task Join(CommandContext ctx, LavalinkExtension lava, DiscordChannel channel)
+        /// <summary>
+        /// Comando para limpiar la lista de reproducción
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("clear")]
+        [Description("Comando para limpiar la lista de reproducción.")]
+        public async Task Clear(CommandContext ctx)
         {
             try
             {
-                if (lava == null) throw new Exception("Conexión a lavalink no encontrada.");
-
-                if (!lava.ConnectedNodes.Any()) throw new Exception("No encontrados nodos conectados.");
-
-                var node = lava.ConnectedNodes.Values.First();
-
-                if (channel.Type != DSharpPlus.ChannelType.Voice) throw new Exception("El canal de voz no es válido.");
-
-                await node.ConnectAsync(channel);
-                //await ctx.RespondAsync($"Conectado-a-{channel.Name}");
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).First();
+                Utiles.listaPlaylists.Remove(_mpl);
+                _mpl.playList = new List<MusicTrack>();
+                Utiles.listaPlaylists.Add(_mpl);
             }
             catch (Exception ex)
             {
-                throw ex;
+                await Error.MostrarError(ctx.Channel, ex.Message);
             }
         }
 
@@ -487,6 +513,27 @@ namespace Bigotes.Commands
 
                 await conn.DisconnectAsync();
                 //await ctx.RespondAsync($"Desconectado-de-{channel.Name}");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task Join(CommandContext ctx, LavalinkExtension lava, DiscordChannel channel)
+        {
+            try
+            {
+                if (lava == null) throw new Exception("Conexión a lavalink no encontrada.");
+
+                if (!lava.ConnectedNodes.Any()) throw new Exception("No encontrados nodos conectados.");
+
+                var node = lava.ConnectedNodes.Values.First();
+
+                if (channel.Type != DSharpPlus.ChannelType.Voice) throw new Exception("El canal de voz no es válido.");
+
+                await node.ConnectAsync(channel);
+                //await ctx.RespondAsync($"Conectado-a-{channel.Name}");
             }
             catch (Exception ex)
             {
