@@ -4,5 +4,6 @@
   "token": "YOUR TOKEN HERE",
   "prefix": "Bigotes, ",
   "spotifyClientID": "YOUR SPOTIFY API CLIENT ID",
-  "spotifyClientSecret": "YOUR SPOTIFY API SECRET CLIENT ID"
+  "spotifyClientSecret": "YOUR SPOTIFY API SECRET CLIENT ID",
+  "spotifyRefreshToken": "YOUR SPOTIFY REFRESH TOKEN (REFRESH CLIENT ID WHEN RESPONSE EXPIRES)"
 }

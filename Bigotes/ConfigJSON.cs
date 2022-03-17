@@ -21,5 +21,8 @@ namespace Bigotes
 
         [JsonProperty("spotifyClientSecret")]
         public string SpotifySecretClient { get; private set; }
+
+        [JsonProperty("spotifyRefreshToken")]
+        public string SpotifyRefreshToken { get; private set; }
     }
 }

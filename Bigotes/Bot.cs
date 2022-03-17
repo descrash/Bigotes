@@ -99,7 +99,15 @@ namespace Bigotes
                 var request = new ClientCredentialsRequest(ConfigJson.SpotifyClient, ConfigJson.SpotifySecretClient);
                 var response = await new OAuthClient(spotiConfig).RequestToken(request);
 
-                Util.Utiles.spotifyClient = new SpotifyClient(spotiConfig.WithToken(response.AccessToken));
+                if (response.IsExpired)
+                {
+                    var refreshResponse = await new OAuthClient().RequestToken(new TokenSwapTokenRequest(new Uri("http://localhost"), ConfigJson.SpotifyRefreshToken));
+                    Util.Utiles.spotifyClient = new SpotifyClient(refreshResponse.AccessToken);
+                }
+                else
+                {
+                    Util.Utiles.spotifyClient = new SpotifyClient(spotiConfig.WithToken(response.AccessToken));
+                }
                 #endregion
 
                 Client.Ready += OnClientReady;
