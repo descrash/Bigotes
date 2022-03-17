@@ -13,6 +13,12 @@ namespace Bigotes.Util
     public static class Utiles
     {
         #region Propiedades
+
+        /// <summary>
+        /// Variable de configuración...
+        /// </summary>
+        public static ConfigJSON ConfigJson;
+
         /// <summary>
         /// Índice de cordialidad para el saludo
         /// </summary>
