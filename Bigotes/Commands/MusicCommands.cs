@@ -196,7 +196,7 @@ namespace Bigotes.Commands
             try
             {
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == sender.Guild).FirstOrDefault();
-                if (_mpl.playList.Count == 0)
+                if (_mpl.playList.Count == 1)
                 {
                     Utiles.listaPlaylists.Remove(_mpl);
                     await _mpl.textTriggerChannel.SendMessageAsync($"```Reproducción-terminada.```").ConfigureAwait(false);
