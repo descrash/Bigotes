@@ -50,7 +50,6 @@ namespace Bigotes
             {
                 #region Obtención de fichero de configuración (JSON)
                 string jsonSTR = string.Empty;
-                ConfigJSON ConfigJson;
 
                 using (var fs = File.OpenRead("config.json"))
                 {
@@ -60,13 +59,13 @@ namespace Bigotes
                     }
                 }
 
-                ConfigJson = JsonConvert.DeserializeObject<ConfigJSON>(jsonSTR);
+                Util.Utiles.ConfigJson = JsonConvert.DeserializeObject<ConfigJSON>(jsonSTR);
                 #endregion
 
                 #region Configuración de bot
                 DiscordConfiguration config = new DiscordConfiguration
                 {
-                    Token = ConfigJson.Token,
+                    Token = Util.Utiles.ConfigJson.Token,
                     TokenType = TokenType.Bot,
                     AutoReconnect = true,
                     MinimumLogLevel = LogLevel.Debug
@@ -92,23 +91,7 @@ namespace Bigotes
                 var lavalink = Client.UseLavalink();
                 #endregion
 
-                #region Configuración de Spotify
-                //SpotifyAPI-NET necesita crear su propio archivo de configuración y cliente OAuth para las credenciales
-                var spotiConfig = SpotifyClientConfig.CreateDefault();
-
-                var request = new ClientCredentialsRequest(ConfigJson.SpotifyClient, ConfigJson.SpotifySecretClient);
-                var response = await new OAuthClient(spotiConfig).RequestToken(request);
-
-                if (response.IsExpired)
-                {
-                    var refreshResponse = await new OAuthClient().RequestToken(new TokenSwapTokenRequest(new Uri("http://localhost"), ConfigJson.SpotifyRefreshToken));
-                    Util.Utiles.spotifyClient = new SpotifyClient(refreshResponse.AccessToken);
-                }
-                else
-                {
-                    Util.Utiles.spotifyClient = new SpotifyClient(spotiConfig.WithToken(response.AccessToken));
-                }
-                #endregion
+                
 
                 Client.Ready += OnClientReady;
 
@@ -125,7 +108,7 @@ namespace Bigotes
                 #region Comandos
                 CommandsNextConfiguration commandsConfig = new CommandsNextConfiguration
                 {
-                    StringPrefixes = new string[] { ConfigJson.Prefix },
+                    StringPrefixes = new string[] { Util.Utiles.ConfigJson.Prefix },
                     EnableDms = false,
                     EnableMentionPrefix = true,
                     IgnoreExtraArguments = true,
