@@ -28,6 +28,11 @@ namespace Bigotes.Clases
         public DiscordChannel textTriggerChannel { get; set; }
 
         /// <summary>
+        /// Pista que se está reproduciendo en este momento
+        /// </summary>
+        public MusicTrack playingTrack { get; set; }
+
+        /// <summary>
         /// Lista de pistas
         /// </summary>
         public List<MusicTrack> playList { get; set; }

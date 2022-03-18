@@ -117,14 +117,26 @@ namespace Bigotes.Commands
                         }
                         #endregion
 
+                        #region Obtención de las pistas (la lista está paginada)
                         var playlist = await Utiles.spotifyClient.Playlists.Get(playlistID);
-                        //Añadimos la playlist a la lista
-                        foreach (var _track in playlist.Tracks.Items)
+                        int total = playlist.Tracks.Total ?? default(int);
+                        int limit = playlist.Tracks.Limit ?? default(int);
+                        for (int pagesNum = total/limit; pagesNum >= 0; pagesNum--)
                         {
-                            var fullTrack = (SpotifyAPI.Web.FullTrack)_track.Track;
-                            _mpl.playList.Add(new MusicTrack(fullTrack.Name, fullTrack.Artists.First().Name, fullTrack.PreviewUrl));
+                            foreach (var _track in playlist.Tracks.Items)
+                            {
+                                var fullTrack = (SpotifyAPI.Web.FullTrack)_track.Track;
+                                _mpl.playList.Add(new MusicTrack(fullTrack.Name, fullTrack.Artists.First().Name, fullTrack.PreviewUrl));
+                            }
+
+                            if (!String.IsNullOrEmpty(playlist.Tracks.Next))
+                            {
+                                playlist.Tracks = await Utiles.spotifyClient.NextPage(playlist.Tracks);
+                            }
                         }
-                        await ctx.Channel.SendMessageAsync($"```Añadidas-{playlist.Tracks.Items.Count}-canciones-a-la-cola-de-reproducción.```");
+                        #endregion
+
+                        await ctx.Channel.SendMessageAsync($"```Añadidas-{_mpl.playList.Count()}-canciones-a-la-cola-de-reproducción.```");
                     }
                     else
                     {
@@ -154,12 +166,13 @@ namespace Bigotes.Commands
                 #region 6. En caso de no haber nada reproduciendo, se procederá a su reproducción
                 while (!currentlyPlaying && _mpl.playList.Count > 0)
                 {
-                    var firstTrack = _mpl.playList.First();
-                    loadResult = await node.Rest.GetTracksAsync($"{firstTrack.Name} {firstTrack.Author}");
+                    _mpl.playingTrack = _mpl.playList.First();
+                    _mpl.playList.Remove(_mpl.playList.First());
+                    loadResult = await node.Rest.GetTracksAsync($"{_mpl.playingTrack.Name} {_mpl.playingTrack.Author}");
                     
                     if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
                     {
-                        await Error.MostrarError(ctx.Channel, $"Error al reproducir la pista: {firstTrack.Name} de {firstTrack.Author}.");
+                        await Error.MostrarError(ctx.Channel, $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
                         _mpl.playList.RemoveAt(0);
                     }
                     else
@@ -167,7 +180,7 @@ namespace Bigotes.Commands
                         currentlyPlaying = true;
                         await _mpl.connection.PlayAsync(loadResult.Tracks.First());
                         _mpl.connection.PlaybackFinished += PistaTerminada;
-                        await ctx.Channel.SendMessageAsync($"`[REPRODUCIENDO]` ```{firstTrack.Name}, de-{firstTrack.Author}```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false);
                     }
                 }
 
@@ -196,7 +209,7 @@ namespace Bigotes.Commands
             try
             {
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == sender.Guild).FirstOrDefault();
-                if (_mpl.playList.Count == 1)
+                if (_mpl.playList.Count == 0)
                 {
                     Utiles.listaPlaylists.Remove(_mpl);
                     await _mpl.textTriggerChannel.SendMessageAsync($"```Reproducción-terminada.```").ConfigureAwait(false);
@@ -204,15 +217,15 @@ namespace Bigotes.Commands
                 }
                 else
                 {
+                    _mpl.playingTrack = _mpl.playList.First();
                     _mpl.playList.Remove(_mpl.playList.First());
-                    var firstTrack = _mpl.playList.First();
-                    var loadResult = await _mpl.connection.Node.Rest.GetTracksAsync($"{firstTrack.Name} {firstTrack.Author}");    
+                    var loadResult = await _mpl.connection.Node.Rest.GetTracksAsync($"{_mpl.playingTrack.Name} {_mpl.playingTrack.Author}");    
                     if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
                     {
-                        throw new Exception( $"Error al reproducir la pista: {firstTrack.Name} de {firstTrack.Author}.");
+                        throw new Exception( $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
                     }
                     await _mpl.connection.PlayAsync(loadResult.Tracks.First());
-                    await _mpl.textTriggerChannel.SendMessageAsync($"`[REPRODUCIENDO]` ```{firstTrack.Name}, de-{firstTrack.Author}```").ConfigureAwait(false);
+                    await _mpl.textTriggerChannel.SendMessageAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -357,7 +370,7 @@ namespace Bigotes.Commands
                     #endregion
 
                     //No hay más canciones después
-                    if (_mpl.playList.Count == 1) throw new Exception("Es la última canción de la cola.");
+                    if (_mpl.playList.Count == 0) throw new Exception("Es la última canción de la cola...");
 
                     //Utiles.listaPlaylists.Remove(_mpl);
                     _mpl.textTriggerChannel = ctx.Channel;
@@ -386,11 +399,12 @@ namespace Bigotes.Commands
                 if (_mpl == null)
                 {
                     //La lista está vacía
-                    throw new Exception("No estoy reproduciendo en este momento.");
+                    throw new Exception("No hay canciones en la lista en estos momentos.");
                 }
                 else
                 {
                     StringBuilder queue = new StringBuilder();
+                    queue.Append($"**REPRODUCIENDO:** {_mpl.playingTrack.Name}, de {_mpl.playingTrack.Author}\n");
 
                     for (int i = 0; i < _mpl.playList.Count() && i < 10; i++)
                     {
@@ -450,11 +464,7 @@ namespace Bigotes.Commands
 
                     var rand = new Random();
                     Utiles.listaPlaylists.Remove(_mpl);
-                    var firstTrack = _mpl.playList.First();
-                    
                     _mpl.playList = _mpl.playList.OrderBy(x => rand.Next()).ToList<MusicTrack>();
-                    _mpl.playList.Remove(firstTrack); //Borrar la primera pista para no repetirla
-
                     Utiles.listaPlaylists.Add(_mpl);
 
                     await ctx.Channel.SendMessageAsync("```Lista-mezclada.```").ConfigureAwait(false);
