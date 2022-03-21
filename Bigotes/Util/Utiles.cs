@@ -25,11 +25,6 @@ namespace Bigotes.Util
         public static int cordialidad;
 
         /// <summary>
-        /// Canal determinado para la encuesta
-        /// </summary>
-        public static DiscordChannel canalEventos;
-
-        /// <summary>
         /// Enumerado para elegir género de personaje en creación de ficha
         /// </summary>
         public enum Genero

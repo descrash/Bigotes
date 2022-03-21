@@ -92,30 +92,30 @@ namespace Bigotes.Commands
                 {
                     var querySubSTR = query.Split('/', '?');
 
+                    #region Configuración de Spotify
+                    //SpotifyAPI-NET necesita crear su propio archivo de configuración y cliente OAuth para las credenciales
+                    var spotiConfig = SpotifyClientConfig.CreateDefault();
+
+                    var request = new ClientCredentialsRequest(Utiles.ConfigJson.SpotifyClient, Util.Utiles.ConfigJson.SpotifySecretClient);
+                    var response = await new OAuthClient(spotiConfig).RequestToken(request);
+
+                    //Se comprueba si el Token ha caducado...
+
+                    if (response.IsExpired)
+                    {
+                        var refreshResponse = await new OAuthClient().RequestToken(new TokenSwapTokenRequest(new Uri("http://localhost"), Utiles.ConfigJson.SpotifyRefreshToken));
+                        Util.Utiles.spotifyClient = new SpotifyClient(refreshResponse.AccessToken);
+                    }
+                    else
+                    {
+                        Util.Utiles.spotifyClient = new SpotifyClient(spotiConfig.WithToken(response.AccessToken));
+                    }
+                    #endregion
+
                     if (querySubSTR[3] == "playlist")
                     {
                         //Es una playlist
                         var playlistID = querySubSTR[4];
-
-                        #region Configuración de Spotify
-                        //SpotifyAPI-NET necesita crear su propio archivo de configuración y cliente OAuth para las credenciales
-                        var spotiConfig = SpotifyClientConfig.CreateDefault();
-
-                        var request = new ClientCredentialsRequest(Utiles.ConfigJson.SpotifyClient, Util.Utiles.ConfigJson.SpotifySecretClient);
-                        var response = await new OAuthClient(spotiConfig).RequestToken(request);
-
-                        //Se comprueba si el Token ha caducado...
-
-                        if (response.IsExpired)
-                        {
-                            var refreshResponse = await new OAuthClient().RequestToken(new TokenSwapTokenRequest(new Uri("http://localhost"), Utiles.ConfigJson.SpotifyRefreshToken));
-                            Util.Utiles.spotifyClient = new SpotifyClient(refreshResponse.AccessToken);
-                        }
-                        else
-                        {
-                            Util.Utiles.spotifyClient = new SpotifyClient(spotiConfig.WithToken(response.AccessToken));
-                        }
-                        #endregion
 
                         #region Obtención de las pistas (la lista está paginada)
                         var playlist = await Utiles.spotifyClient.Playlists.Get(playlistID);

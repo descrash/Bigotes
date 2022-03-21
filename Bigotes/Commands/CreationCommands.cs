@@ -46,60 +46,7 @@ namespace Bigotes.Commands
                         break;
 
                     case "EVENTO":
-                        var channelMSG = new InteractivityResult<DiscordMessage>();
-                        ulong channelID = 0;
-                        if (Utiles.canalEventos != null)
-                        {
-                            var yesNoBtnBuilder = Utiles.crearMensajeDeBotones(
-                                    ctx,
-                                    "`[OPCIÓN ESCOGIDA]` ```Canal-de-eventos-escogido: " + Utiles.canalEventos.Name + ". ¿Desea-cambiar-de-canal?```",
-                                    new string[] { "SI", "NO" },
-                                    new string[] { "Sí", "No" },
-                                    new ButtonStyle[] { ButtonStyle.Success, ButtonStyle.Danger }
-                                );
-
-                            var yesNoMsg = await ctx.Channel.SendMessageAsync(yesNoBtnBuilder).ConfigureAwait(false);
-
-                            //La repetición mostrada a continuación es necesaria: las reacciones al botón no pueden salir del ComponentInteractionCreated, ya que
-                            //este método es asíncrono y se ejecutará a la par que el resto del código que le sigue, mandando la continuidad a la porra.
-                            ctx.Client.ComponentInteractionCreated += async (s, e) =>
-                            {
-                                if (e.Id.ToUpper() == "SI")
-                                {
-                                    await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent("```Indicar-canal-de-evento: ```"));
-                                    channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-
-                                    while (!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)
-                                    {
-                                        await ctx.Channel.SendMessageAsync("`[ERROR]` ```Recomendable-citar-canal-en-mensaje-para-facilitar-procesamiento. Inténtelo-de-nuevo:```").ConfigureAwait(false);
-                                        channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-                                    }
-
-                                    Utiles.canalEventos = ctx.Guild.GetChannel(channelID);
-                                }
-                                else
-                                {
-                                    await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent("```Canal-seleccionado:``` #" + Utiles.canalEventos.Name));
-                                }
-
-                                await Evento(ctx, Utiles.canalEventos);
-                            };
-                        }
-                        else
-                        {
-                            await ctx.Channel.SendMessageAsync("```Indicar-canal-de-evento: ```").ConfigureAwait(false);
-                            channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-
-                            while (!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)
-                            {
-                                await ctx.Channel.SendMessageAsync("`[ERROR]` ```Recomendable-citar-canal-en-mensaje-para-facilitar-procesamiento. Inténtelo-de-nuevo:```").ConfigureAwait(false);
-                                channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
-                            }
-
-                            Utiles.canalEventos = ctx.Guild.GetChannel(channelID);
-
-                            await Evento(ctx, Utiles.canalEventos);
-                        }
+                        await Evento(ctx);
                         break;
 
                     default:
@@ -708,12 +655,28 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <param name="canalEncuesta"></param>
         /// <returns></returns>
-        public async Task Evento(CommandContext ctx, DiscordChannel canalEncuesta)
+        public async Task Evento(CommandContext ctx)
         {
             try
             {
                 Evento nuevoEvento = new Evento();
+                DiscordChannel canalEncuesta;
                 var interactivity = ctx.Client.GetInteractivity();
+
+                #region Canal de eventos
+                var channelMSG = new InteractivityResult<DiscordMessage>();
+                ulong channelID = 0;
+                await ctx.Channel.SendMessageAsync("```Indicar-canal-de-evento: ```").ConfigureAwait(false);
+                channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+
+                while (!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)
+                {
+                    await ctx.Channel.SendMessageAsync("`[ERROR]` ```Recomendable-citar-canal-en-mensaje-para-facilitar-procesamiento. Inténtelo-de-nuevo:```").ConfigureAwait(false);
+                    channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
+                }
+
+                canalEncuesta = ctx.Guild.GetChannel(channelID);
+                #endregion
 
                 #region Nombre
                 await ctx.Channel.SendMessageAsync("```Preparando... Nombre-del-evento:```").ConfigureAwait(false);
