@@ -3,6 +3,7 @@ using Bigotes.Util;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.Lavalink;
 using SpotifyAPI.Web;
 using System;
@@ -29,7 +30,7 @@ namespace Bigotes.Commands
         /// <param name="query"></param>
         /// <returns></returns>
         [Command("play")]
-        [Description("Comando para reproducir música (EN PRUEBAS).")]
+        [Description("Reproducir música (EN PRUEBAS).")]
         public async Task Play(CommandContext ctx, [Description("Texto de búsqueda o URL.")][RemainingText]string query)
         {
             #region Propiedades
@@ -39,10 +40,6 @@ namespace Bigotes.Commands
 
             try
             {
-                //throw new Exception("Opción no implementada.");
-
-                await ctx.Channel.SendMessageAsync("`[AVISO]` ```Los-métodos-de-reproducción-de-música-se-encuentran-en-período-de-pruebas. Podría-no-funcionar-correctamente.```").ConfigureAwait(false);
-
                 #region 1. Comprobación de que el usuario se encuentra en un canal de voz
                 if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
                 #endregion
@@ -126,7 +123,7 @@ namespace Bigotes.Commands
                             foreach (var _track in playlist.Tracks.Items)
                             {
                                 var fullTrack = (SpotifyAPI.Web.FullTrack)_track.Track;
-                                _mpl.playList.Add(new MusicTrack(fullTrack.Name, fullTrack.Artists.First().Name, fullTrack.PreviewUrl));
+                                _mpl.playList.Add(new MusicTrack(fullTrack.Name, fullTrack.Artists.First().Name, new TimeSpan(fullTrack.DurationMs * TimeSpan.TicksPerMillisecond), fullTrack.PreviewUrl));
                             }
 
                             if (!String.IsNullOrEmpty(playlist.Tracks.Next))
@@ -143,7 +140,7 @@ namespace Bigotes.Commands
                         //Es una única canción
                         var trackID = querySubSTR[4];
                         var track = await Utiles.spotifyClient.Tracks.Get(trackID);
-                        _mpl.playList.Add(new MusicTrack(track.Name, track.Artists.First().Name, track.PreviewUrl));
+                        _mpl.playList.Add(new MusicTrack(track.Name, track.Artists.First().Name, new TimeSpan(track.DurationMs * TimeSpan.TicksPerMillisecond), track.PreviewUrl));
                         //Añadimos la canción a la lista
                         await ctx.Channel.SendMessageAsync($"```Añadida-{track.Name}-de-{track.Artists.First().Name}-a-la-cola-de-reproducción.```");
                     }
@@ -157,7 +154,7 @@ namespace Bigotes.Commands
                     }
 
                     playableTrack = loadResult.Tracks.First();
-                    _mpl.playList.Add(new MusicTrack(playableTrack.Title, playableTrack.Author, playableTrack.Uri.ToString()));
+                    _mpl.playList.Add(new MusicTrack(playableTrack.Title, playableTrack.Author, playableTrack.Length, playableTrack.Uri.ToString()));
 
                     await ctx.Channel.SendMessageAsync($"```Añadida-{playableTrack.Title}-de-{playableTrack.Author}-a-la-cola-de-reproducción.```");
                 }
@@ -198,49 +195,12 @@ namespace Bigotes.Commands
         }
 
         /// <summary>
-        /// Método que se triggerea cuando una canción termina de reproducirse,
-        /// iniciando la siguiente en la lista o borrando ésta.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        private async Task PistaTerminada(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackFinishEventArgs e)
-        {
-            try
-            {
-                _mpl = Utiles.listaPlaylists.Where(x => x.guild == sender.Guild).FirstOrDefault();
-                if (_mpl.playList.Count == 0)
-                {
-                    Utiles.listaPlaylists.Remove(_mpl);
-                    await _mpl.textTriggerChannel.SendMessageAsync($"```Reproducción-terminada.```").ConfigureAwait(false);
-                    await _mpl.connection.DisconnectAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    _mpl.playingTrack = _mpl.playList.First();
-                    _mpl.playList.Remove(_mpl.playList.First());
-                    var loadResult = await _mpl.connection.Node.Rest.GetTracksAsync($"{_mpl.playingTrack.Name} {_mpl.playingTrack.Author}");    
-                    if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
-                    {
-                        throw new Exception( $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
-                    }
-                    await _mpl.connection.PlayAsync(loadResult.Tracks.First());
-                    await _mpl.textTriggerChannel.SendMessageAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                await Error.MostrarError(_mpl.textTriggerChannel, ex.Message);
-            }
-        }
-
-        /// <summary>
         /// Comando para pausar la reproducción actual de música
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("pause")]
-        [Description("Comando para pausar la música que se está reproduciendo.")]
+        [Description("Pausar la música que se está reproduciendo.")]
         public async Task Pause(CommandContext ctx)
         {
             try
@@ -282,7 +242,7 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("resume")]
-        [Description("Comando para reanudar la música pausada en ese momento.")]
+        [Description("Reanudar la música pausada en ese momento.")]
         public async Task Resume(CommandContext ctx)
         {
             try
@@ -324,11 +284,15 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("stop")]
-        [Description("Comando para parar de reproducir la música y vaciar la lista...")]
+        [Description("Parar de reproducir la música y vaciar la lista...")]
         public async Task Stop(CommandContext ctx)
         {
             try
             {
+                #region Comprobación de que el usuario se encuentra en un canal de voz
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                #endregion
+
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).First();
                 Utiles.listaPlaylists.Remove(_mpl);
                 _mpl.playList = new List<MusicTrack>();
@@ -347,7 +311,7 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("next")]
-        [Description("Comando para pasar a la siguiente canción de la pista que se está reproduciendo.")]
+        [Description("Pasar a la siguiente canción de la pista que se está reproduciendo.")]
         public async Task Next(CommandContext ctx)
         {
             try
@@ -384,12 +348,32 @@ namespace Bigotes.Commands
         }
 
         /// <summary>
-        /// Comando para mostrar las diez primeras canciones de la cola en reproducción
+        /// Comando para mostrar la canción que se está reproduciendo actualmente
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        [Command("np")]
+        [Description("Mostrar la canción que se está reproduciendo en este momento.")]
+        public async Task NowPlaying(CommandContext ctx)
+        {
+            try
+            {
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).FirstOrDefault();
+                await ctx.Channel.SendMessageAsync($"**REPRODUCIENDO:** *{_mpl.playingTrack.Name}*, de {_mpl.playingTrack.Author} [{_mpl.playingTrack.LengthSTR}]\n").ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx.Channel, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Comando para mostrar la lista paginada de canciones de la cola en reproducción
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("queue")]
-        [Description("Comando para mostrar las diez primeras canciones de la cola en reproducción.")]
+        [Description("Mostrar la lista de canciones de la cola en reproducción.")]
         public async Task Queue(CommandContext ctx)
         {
             try
@@ -404,26 +388,16 @@ namespace Bigotes.Commands
                 else
                 {
                     StringBuilder queue = new StringBuilder();
-                    queue.Append($"**REPRODUCIENDO:** {_mpl.playingTrack.Name}, de {_mpl.playingTrack.Author}\n");
+                    queue.Append($"**REPRODUCIENDO:** *{_mpl.playingTrack.Name}*, de {_mpl.playingTrack.Author} [{_mpl.playingTrack.LengthSTR}]\n");
 
-                    for (int i = 0; i < _mpl.playList.Count() && i < 10; i++)
+                    for (int i = 0; i < _mpl.playList.Count(); i++)
                     {
-                        queue.Append($"**{i+1}.** {_mpl.playList[i].Name}, de {_mpl.playList[i].Author}\n");
+                        queue.Append($"**{i+1}.** *{_mpl.playList[i].Name}*, de {_mpl.playList[i].Author} [{_mpl.playList[i].LengthSTR}]\n");
                     }
 
-                    if (_mpl.playList.Count() > 10)
-                    {
-                        queue.Append($"*... y {_mpl.playList.Count() - 10} más...*\n");
-                    }
-
-                    var embedQueue = new DiscordEmbedBuilder
-                    {
-                        Title = "LISTA-DE-REPRODUCCIÓN-ACTUAL",
-                        Description = queue.ToString(),
-                        Color = DiscordColor.DarkGreen
-                    };
-
-                    await ctx.Channel.SendMessageAsync(embed: embedQueue).ConfigureAwait(false);
+                    var interactivity = ctx.Client.GetInteractivity();
+                    var pages = interactivity.GeneratePagesInEmbed(queue.ToString());
+                    await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
                 }
             }
             catch (Exception ex)
@@ -438,7 +412,7 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("shuffle")]
-        [Description("Comando para mezclar la cola en reproducción.")]
+        [Description("Mezclar la cola en reproducción.")]
         public async Task Shuffle(CommandContext ctx)
         {
             try
@@ -482,11 +456,15 @@ namespace Bigotes.Commands
         /// <param name="ctx"></param>
         /// <returns></returns>
         [Command("clear")]
-        [Description("Comando para limpiar la lista de reproducción.")]
+        [Description("Limpiar la lista de reproducción.")]
         public async Task Clear(CommandContext ctx)
         {
             try
             {
+                #region Comprobación de que el usuario se encuentra en un canal de voz
+                if (ctx.Member.VoiceState == null) throw new Exception("La solicitud de música debe hacerse desde un canal de voz.");
+                #endregion
+
                 _mpl = Utiles.listaPlaylists.Where(x => x.guild == ctx.Guild).First();
                 Utiles.listaPlaylists.Remove(_mpl);
                 _mpl.playList = new List<MusicTrack>();
@@ -505,7 +483,7 @@ namespace Bigotes.Commands
         /// <param name="channel"></param>
         /// <returns></returns>
         [Command("leave")]
-        [Description("Comando para desconectar a Bigotes de un canal de voz en caso de que se quede atascado en el mismo.")]
+        [Description("Desconectar a Bigotes de un canal de voz en caso de que se quede atascado en el mismo.")]
         public async Task Leave(CommandContext ctx)
         {
             var lava = ctx.Client.GetLavalink();
@@ -530,6 +508,50 @@ namespace Bigotes.Commands
             }
         }
 
+        /// <summary>
+        /// Método que se triggerea cuando una canción termina de reproducirse,
+        /// iniciando la siguiente en la lista o borrando ésta.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        private async Task PistaTerminada(LavalinkGuildConnection sender, DSharpPlus.Lavalink.EventArgs.TrackFinishEventArgs e)
+        {
+            try
+            {
+                _mpl = Utiles.listaPlaylists.Where(x => x.guild == sender.Guild).FirstOrDefault();
+                if (_mpl.playList.Count == 0)
+                {
+                    Utiles.listaPlaylists.Remove(_mpl);
+                    await _mpl.textTriggerChannel.SendMessageAsync($"```Reproducción-terminada.```").ConfigureAwait(false);
+                    await _mpl.connection.DisconnectAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    _mpl.playingTrack = _mpl.playList.First();
+                    _mpl.playList.Remove(_mpl.playList.First());
+                    var loadResult = await _mpl.connection.Node.Rest.GetTracksAsync($"{_mpl.playingTrack.Name} {_mpl.playingTrack.Author}");
+                    if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+                    {
+                        throw new Exception($"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
+                    }
+                    await _mpl.connection.PlayAsync(loadResult.Tracks.First());
+                    await _mpl.textTriggerChannel.SendMessageAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(_mpl.textTriggerChannel, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Método para entrar en el canal de voz concreto
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="lava"></param>
+        /// <param name="channel"></param>
+        /// <returns></returns>
         public async Task Join(CommandContext ctx, LavalinkExtension lava, DiscordChannel channel)
         {
             try

@@ -24,32 +24,57 @@ namespace Bigotes.Commands
         {
             List<string> output = new List<string>();
             string values = String.Empty,totalValue = String.Empty, msg;
-            Dices dices = new Dices();
 
-            output = dices.Roll(tirada.Trim());
+            try
+            {
+                Dices dices = new Dices();
 
-            if (output == null || output.Count == 0)
-            {
-                msg = "`[CARGANDO MENSAJE DE ERROR]` ```Error-en-ejecución-de-comando.``` `[CARGANDO SUGERENCIA]` ```Por-favor,-utilice-el-formato-00d00-sumando-de-cero-a-infinito-añadidos).```";
-            }
-            else if (output.Last() == "[1]" && output.Count == 1)
-            {
-                msg = "`[CARGANDO RESULTADO: " + output.First() + ", DESASTROSO]` ```Resultado: [PIFIA]``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.``` `[CARGANDO GRABACIÓN DE VOZ DE MURETHOR]` ```[S'a matao Paco]```";
-            }
-            else
-            {
-                foreach (string str in output)
+                output = dices.Roll(tirada.Trim());
+
+                if (output.Last() == "[1]" && output.Count == 1)
                 {
-                    if (!str.Contains("Resultado"))
-                        values += " " + str;
-                    else
-                        totalValue = str;
+                    msg = "`[CARGANDO RESULTADO: " + output.First() + ", DESASTROSO]` ```Resultado: [PIFIA]``` `[ERROR EN MENSAJE DE ÁNIMO]` ```Aconsejable-realizar-la-creación-de-una-ficha-nueva.``` `[CARGANDO GRABACIÓN DE VOZ DE MURETHOR]` ```[S'a matao Paco]```";
+                }
+                else
+                {
+                    foreach (string str in output)
+                    {
+                        if (!str.Contains("Resultado"))
+                            values += " " + str;
+                        else
+                            totalValue = str;
+                    }
+
+                    msg = "`[CARGANDO RESULTADOS:" + values + " ]`\n`[CALCULANDO BONIFICADORES Y PENALIZADORES]` ```" + totalValue + ".```";
                 }
 
-                msg = "`[CARGANDO RESULTADOS:" + values + " ]`\n`[CALCULANDO BONIFICADORES Y PENALIZADORES]` ```" + totalValue + ".```";
+                await ctx.Channel.SendMessageAsync(msg).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await Error.MostrarError(ctx.Channel, $"{ex.Message} Sugerencia: Utilice-el-formato-00d00-con-sumas-y-restas-adicionales." +
+                    "Rango-del-entero-registrado-por-unidad-de-procesamiento-de-Bigotes: -2.147.483.648 a 2.147.483.648.");
+            }
+        }
+
+        /// <summary>
+        /// Función para devolver una consecuencia aleatoria de haber sufrido una pifia
+        /// </summary>
+        /// <returns></returns>
+        public string ConsecuenciaPifia()
+        {
+            string consecuencia = String.Empty;
+
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
 
-            await ctx.Channel.SendMessageAsync(msg).ConfigureAwait(false);
+            return consecuencia;
         }
     }
 }

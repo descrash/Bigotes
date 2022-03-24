@@ -155,8 +155,12 @@ namespace Bigotes.Util
             }
             catch(Exception ex)
             {
-                Debug.Write("ERROR: " + ex.Message);
-                totalValue = -1;
+                //Esto lo he puesto porque mis compañeros son muy cabrones y no entendían por qué no podían tirar un dado de nueve mil trillones
+                if (ex.Message == "Value was either too large or too small for an Int32.")
+                {
+                    throw new Exception("El valor sale del rango aceptado (-2.147.483.648,2.147.483.648).");
+                }
+                throw ex;
             }
 
             return RESULTADOS;
