@@ -320,7 +320,7 @@ namespace Bigotes.Commands
             {
                 if (ctx.Guild.Channels.Where(x => x.Value.Name == "frases-celebres").Count() == 0)
                 {
-                    throw new Exception("No se encuentra canal con nombre #frases celebres.");
+                    throw new Exception("No se encuentra canal con nombre #frases-celebres.");
                 }
                 
                 var sentMSG = await ctx.Channel.SendMessageAsync("`CARGANDO...` ```Seleccionando-frase. Espere...```").ConfigureAwait(false);
