@@ -18,6 +18,7 @@ namespace Bigotes.Commands
     {
         #region Propiedades
         MusicPlaylist _mpl;
+        DiscordMessage _currentlyPlayingMSG;
         #endregion
 
         /// <summary>
@@ -83,6 +84,8 @@ namespace Bigotes.Commands
 
                 //Ejemplo: https://open.spotify.com/track/5FVNpPC0H4fVc4FJin5vBg?si=19fc0d926cb54884
                 //Ejemplo de playlist: https://open.spotify.com/playlist/07ZkxX3cj3M5lTVwc07tcx?si=3f7355440bfc4c24
+                //Ejemplo de álbum: https://open.spotify.com/album/0W6KvWhTTHjkdV1MwBq8bc?si=lFdEfKwDRY2REjTyGW7EpQ
+                //Ejemplo de artista: https://open.spotify.com/artist/3EA6XTfIMRHrecqMdNqHGx?si=lZ-iDLlvQJS1tO1wET2VtQ
 
                 //Comprobamos si query es una URL de Spotify
                 if (query.Contains("https://open.spotify.com"))
@@ -109,9 +112,9 @@ namespace Bigotes.Commands
                     }
                     #endregion
 
-                    if (querySubSTR[3] == "playlist")
+                    if (querySubSTR[3] == "playlist" || querySubSTR[3] == "album" || querySubSTR[3] == "artist")
                     {
-                        //Es una playlist
+                        //Es una lista, album o artista
                         var playlistID = querySubSTR[4];
 
                         #region Obtención de las pistas (la lista está paginada)
@@ -161,7 +164,7 @@ namespace Bigotes.Commands
                 #endregion
 
                 #region 6. En caso de no haber nada reproduciendo, se procederá a su reproducción
-                while (!currentlyPlaying && _mpl.playList.Count > 0)
+                while (_mpl.playingTrack == null && _mpl.playList.Count > 0) 
                 {
                     _mpl.playingTrack = _mpl.playList.First();
                     _mpl.playList.Remove(_mpl.playList.First());
@@ -169,8 +172,7 @@ namespace Bigotes.Commands
                     
                     if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
                     {
-                        await Error.MostrarError(ctx.Channel, $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
-                        _mpl.playList.RemoveAt(0);
+                        await Error.MostrarError(ctx.Channel, $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");;
                     }
                     else
                     {
@@ -536,7 +538,14 @@ namespace Bigotes.Commands
                         throw new Exception($"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
                     }
                     await _mpl.connection.PlayAsync(loadResult.Tracks.First());
-                    await _mpl.textTriggerChannel.SendMessageAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false);
+                    if (_currentlyPlayingMSG == null)
+                    {
+                        _currentlyPlayingMSG = (await _mpl.textTriggerChannel.SendMessageAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false));
+                    }
+                    else
+                    {
+                        await _currentlyPlayingMSG.ModifyAsync($"`[REPRODUCIENDO]` ```{_mpl.playingTrack.Name}, de-{_mpl.playingTrack.Author}```").ConfigureAwait(false);
+                    }
                 }
             }
             catch (Exception ex)
