@@ -83,7 +83,7 @@ namespace Bigotes.Commands
         {
             try
             {
-                string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Utiles.cordialidad + "%]` ";
+                string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Utiles.cordialidad + "%]`";
 
                 #region Saludos en función de cordialidad
                 switch (Utiles.cordialidad)
@@ -142,7 +142,7 @@ namespace Bigotes.Commands
                     case "galletas":
                         if (ctx.User.Username == "Gombut")
                         {
-                            await ctx.Channel.SendMessageAsync("`ERROR: CARGANDO ADVERTENCIA...` ```Según-artículo-223.45-del-reglamento-del-Pacto-contra-el-abuso-de-dulces-y-galletas, "
+                            await ctx.Channel.SendMessageAsync("`[ERROR: CARGANDO ADVERTENCIA...]` ```Según-artículo-223.45-del-reglamento-del-Pacto-contra-el-abuso-de-dulces-y-galletas, "
                                 + "queda-totalmente-prohibida-la-entrega-de-más-gallegas-a-la-Cruzada-Yuubei-por-problemas-de-salud-y-riesgo-para-la-seguridad-de-Tyria.```").ConfigureAwait(false);
                         }
                         else
@@ -159,7 +159,7 @@ namespace Bigotes.Commands
 
                     case "la razón":
                     case "la razon":
-                        await ctx.Channel.SendMessageAsync("`DETECTADA INSEGURIDAD` ```La-falta-de-seguridad-de-la-petición-sugiere-que, con-una-probabilidad-del-87,6%, el-usuario-NO-lleva-la-razón.```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync("`[DETECTADA INSEGURIDAD]` ```La-falta-de-seguridad-de-la-petición-sugiere-que, con-una-probabilidad-del-87,6%, el-usuario-NO-lleva-la-razón.```").ConfigureAwait(false);
                         break;
                 }
             }
@@ -212,7 +212,7 @@ namespace Bigotes.Commands
         {
             try
             {
-                await ctx.Channel.SendMessageAsync("`CARGANDO TABLÓN DE PRESENTACIÓN...`").ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync("`[CARGANDO TABLÓN DE PRESENTACIÓN...]`").ConfigureAwait(false);
 
                 string titulo = "¡SALUDOS!";
 
@@ -273,26 +273,27 @@ namespace Bigotes.Commands
             {
                 switch (pregunta.Replace("?", String.Empty).Trim().ToUpper())
                 {
+                    case "DIA ES":
                     case "DÍA ES":
                         string fecha = Consultas.ConversionCalendario(DateTime.Today);
-                        await ctx.Channel.SendMessageAsync("`FECHA CONSULTADA` ```Hoy-es-" + fecha.Replace(' ', '-') + ".```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync("`[FECHA CONSULTADA]` ```Hoy-es-" + fecha.Replace(' ', '-') + ".```").ConfigureAwait(false);
                         break;
 
                     case "HORA ES":
-                        await ctx.Channel.SendMessageAsync("`HORA CONSULTADA` ```Son-las-" + DateTime.Now.ToString("hh:mm") + ". Una-hora-menos-en-el-Anillo-de-Fuego.```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync("`[HORA CONSULTADA]` ```Son-las-" + DateTime.Now.ToString("hh:mm") + ". Una-hora-menos-en-el-Anillo-de-Fuego.```").ConfigureAwait(false);
                         break;
 
                     case "ERES":
-                        await ctx.Channel.SendMessageAsync("`AUMENTO DE NIVEL DE CONFUSIÓN ANTE PREGUNTA ESTÚPIDA` ```Bigotes-es-Bigotes.```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync("`[AUMENTO DE NIVEL DE CONFUSIÓN ANTE PREGUNTA ESTÚPIDA]` ```Bigotes-es-Bigotes.```").ConfigureAwait(false);
                         break;
 
                     case "TIEMPO HACE":
-                        await ctx.Channel.SendMessageAsync("`CONEXIÓN CON SENSOR METEREOLÓGICO FALLIDA` ```Recomendable-asomar-la-cabeza-por-la-ventana.```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync("`[CONEXIÓN CON SENSOR METEREOLÓGICO FALLIDA]` ```Recomendable-asomar-la-cabeza-por-la-ventana.```").ConfigureAwait(false);
                         break;
 
                     default:
                         if (pregunta.Substring(0, 3) != "es ")
-                            await ctx.Channel.SendMessageAsync("`ERROR` ```Opción-no-encontrada.```").ConfigureAwait(false);
+                            await ctx.Channel.SendMessageAsync("`[ERROR]` ```Opción-no-encontrada.```").ConfigureAwait(false);
                         break;
                 }
 
@@ -323,7 +324,7 @@ namespace Bigotes.Commands
                     throw new Exception("No se encuentra canal con nombre #frases celebres.");
                 }
                 
-                var sentMSG = await ctx.Channel.SendMessageAsync("`CARGANDO...` ```Seleccionando-frase. Espere...```").ConfigureAwait(false);
+                var sentMSG = await ctx.Channel.SendMessageAsync("`[CARGANDO...]` ```Seleccionando-frase. Espere...```").ConfigureAwait(false);
 
                 DiscordChannel channel = ctx.Guild.Channels.Where(x => x.Value.Name == "frases-celebres").First().Value;
                 var msgs = await channel.GetMessagesAsync(9000);
