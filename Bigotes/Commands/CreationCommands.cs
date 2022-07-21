@@ -40,9 +40,7 @@ namespace Bigotes.Commands
                         break;
 
                     case "FICHA":
-                        throw new Exception("La creación de fichas está provisionalmente deshabilitada a causa de futuros cambios en el sistema de personajes. Perdón por las molestias.");
-                        await ctx.Channel.SendMessageAsync("`[ABRIENDO CANAL PRIVADO PARA CREACIÓN DE FICHA]`");
-                        var msgFicha = await ctx.Channel.SendMessageAsync("`[DESCARGANDO TUTORIAL DE FICHA]` ```De-acuerdo. Procediendo-a-comenzar-ficha-de-personaje-paso-por-paso...```").ConfigureAwait(false);
+                        await ctx.Channel.SendMessageAsync("`[ABRIENDO CANAL PRIVADO PARA CREACIÓN DE FICHA. DESCARGANDO TUTORIAL...]`");
                         await Task.Delay(2000);
                         await Ficha(ctx);
                         break;
@@ -238,7 +236,7 @@ namespace Bigotes.Commands
 
                 #region DATOS BÁSICOS
                 #region Nombre y apellidos
-                await author.SendMessageAsync("`[OPCIÓN ESCOGIDA]` ```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
+                await author.SendMessageAsync("```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
                 interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
                 nuevaFicha.nombre_completo = interMSG.Content;
                 await interMSG.DeleteAsync();
