@@ -83,7 +83,7 @@ namespace Bigotes.Commands
         {
             try
             {
-                string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Utiles.cordialidad + "%]`";
+                string lvlCordialidad = "`[PROCESANDO SALUDO. CORDIALIDAD AL " + Utiles.cordialidad + "%]` ";
 
                 #region Saludos en función de cordialidad
                 switch (Utiles.cordialidad)
