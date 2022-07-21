@@ -107,22 +107,26 @@ namespace Bigotes.Util
         }
 
         /// <summary>
-        /// Método para obtener el canal por el nombre
+        /// Método para obtener un canal por su nombre
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="ctx">Contexto</param>
+        /// <param name="channelName">Nombre de búsqueda</param>
+        /// <param name="channelsList">Lista que ha de obtenerse a través de Guild.GetChannelsAsync, ya que no existe método que no sea
+        /// asíncrono y D#plus por algún motivo no tiene absolutamente nada en ctx.Guild.Channels</param>
         /// <returns></returns>
-        public static DiscordChannel GetChannel(CommandContext ctx, string channelName)
+        public static DiscordChannel GetChannel(CommandContext ctx, string channelName, List<DiscordChannel> channelsList)
         {
             DiscordChannel channel = null;
 
             DiscordGuild guild = ctx.Guild;
+            var channels = guild.GetChannelsAsync();
 
-            foreach (var _channel in guild.Channels.Values)
+            foreach (var _channel in channelsList)//guild.Channels.Values)
             {
                 String[] tagsID = { "#", "<", ">" };
 
                 //Se compara nombre si se ha puesto únicamente el nombre ("general") o el ID en caso de haber puesto el tag entero ("#general")
-                if (_channel.Name == channelName.Trim() || _channel.Id.ToString() == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                if (_channel.Name == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
                 {
                     channel = _channel;
                 }
