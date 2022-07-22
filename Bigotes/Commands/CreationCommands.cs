@@ -106,19 +106,19 @@ namespace Bigotes.Commands
 
                 if (durationSTR.Contains("m"))
                 {
-                    durationINT = Int32.Parse(durationSTR.Split('m')[0]);
+                    durationINT = Math.Abs(Int32.Parse(durationSTR.Split('m')[0]));
                     duration = new TimeSpan(0, durationINT, 0);
                     unidadRespuesta = durationINT == 1 ? "minuto" : "minutos";
                 }
                 else if (durationSTR.Contains("h"))
                 {
-                    durationINT = Int32.Parse(durationSTR.Split('h')[0]);
+                    durationINT = Math.Abs(Int32.Parse(durationSTR.Split('h')[0]));
                     duration = new TimeSpan(durationINT, 0, 0);
                     unidadRespuesta = durationINT == 1 ? "hora" : "horas";
                 }
                 else
                 {
-                    durationINT = Int32.Parse(durationSTR.Split('d')[0]);
+                    durationINT = Math.Abs(Int32.Parse(durationSTR.Split('d')[0]));
                     duration = new TimeSpan(durationINT, 0, 0, 0);
                     unidadRespuesta = durationINT == 1 ? "día" : "días";
                 }
