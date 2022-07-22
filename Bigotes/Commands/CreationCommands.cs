@@ -73,7 +73,7 @@ namespace Bigotes.Commands
             try
             {
                 #region Atributos
-                TimeSpan duration = new TimeSpan();
+                TimeSpan duration = new TimeSpan(0);
                 DiscordMember author = ctx.Member;
                 DiscordChannel canalEncuesta = ctx.Channel;
                 string titulo = String.Empty;
@@ -91,42 +91,47 @@ namespace Bigotes.Commands
                 titulo = interMSG.Content;
                 #endregion
 
-                #region Recogida y gestión de la duración de la encuesta
-                await author.SendMessageAsync("`[TÍTULO REGISTRADO]` ```Orden-recibida.-Preciso-concretar-duración-en-minutos(m),-horas(h)-o-días(d):```").ConfigureAwait(false);
+                #region Recogida y gestión de la duración de la encuesta DEPRECATED
+                await author.SendMessageAsync("`[TÍTULO REGISTRADO]` ```Orden-recibida.-Preciso-concretar-duración-en-días(0d),-horas(0h)-o-minutos(0m).-Ejemplo:-2d-10h-40m.```").ConfigureAwait(false);
                 interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
-                string durationSTR = interMSG.Content.Trim(), unidadRespuesta;
+                string[] durationSTR;
+                string unidadRespuesta = String.Empty;
                 int durationINT = 0;
 
-                while (!Regex.IsMatch(durationSTR, @"\d[mhd]"))
+                 while (!Regex.IsMatch(interMSG.Content.Replace(" ", ""), @"\A(\d+[dhm])+\z"))
                 {
                     await author.SendMessageAsync("`[ERROR]` ```Por-favor,-utilizar-formato-00m,-00h-o-00d.```").ConfigureAwait(false);
                     interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
-                    durationSTR = interMSG.Content.Trim();
                 }
 
-                if (durationSTR.Contains("m"))
+                durationSTR = interMSG.Content.Trim().Split(' ');
+
+                for(int i=0; i<durationSTR.Length; i++)
                 {
-                    durationINT = Math.Abs(Int32.Parse(durationSTR.Split('m')[0]));
-                    duration = new TimeSpan(0, durationINT, 0);
-                    unidadRespuesta = durationINT == 1 ? "minuto" : "minutos";
+                    if (durationSTR[i].Contains("d"))
+                    {
+                        durationINT = Math.Abs(Int32.Parse(durationSTR[i].Split('d')[0]));
+                        duration += new TimeSpan(durationINT, 0, 0, 0);
+                    }
+                    else if (durationSTR[i].Contains("h"))
+                    {
+                        durationINT = Math.Abs(Int32.Parse(durationSTR[i].Split('h')[0]));
+                        duration += new TimeSpan(durationINT, 0, 0);
+                    }
+                    else if (durationSTR[i].Contains("m"))
+                    {
+                        durationINT = Math.Abs(Int32.Parse(durationSTR[i].Split('m')[0]));
+                        duration += new TimeSpan(0, durationINT, 0);
+                    }
                 }
-                else if (durationSTR.Contains("h"))
-                {
-                    durationINT = Math.Abs(Int32.Parse(durationSTR.Split('h')[0]));
-                    duration = new TimeSpan(durationINT, 0, 0);
-                    unidadRespuesta = durationINT == 1 ? "hora" : "horas";
-                }
-                else
-                {
-                    durationINT = Math.Abs(Int32.Parse(durationSTR.Split('d')[0]));
-                    duration = new TimeSpan(durationINT, 0, 0, 0);
-                    unidadRespuesta = durationINT == 1 ? "día" : "días";
-                }
+
+                if (duration.Days != 0) { unidadRespuesta += "-" + duration.Days + (duration.Days == 1 ? "día" : "días"); }
+                if (duration.Hours != 0) { unidadRespuesta += "-" + duration.Hours + (duration.Hours == 1 ? "-hora" : "horas"); }
+                if (duration.Minutes != 0) { unidadRespuesta += "-" + duration.Minutes + (duration.Minutes == 1 ? "-minuto" : "-minutos"); }
                 #endregion
 
                 #region Recogida y gestión del canal en el que realizar la encuesta
-                await author.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Detallar-nombre-de-canal-de-encuesta.-Libertad-de-tomar-canal-actual-en-caso-de-no-existir-petición.```").ConfigureAwait(false);
-
+                await author.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de" + unidadRespuesta + ".``` ```Detallar-nombre-de-canal-de-encuesta.-Libertad-de-tomar-canal-actual-en-caso-de-no-existir-petición.```").ConfigureAwait(false);
                 interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 string channelName = interMSG.Content;
                 canalEncuesta = Consultas.GetChannel(ctx, channelName);
