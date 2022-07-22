@@ -40,6 +40,8 @@ namespace Bigotes.Commands
                         break;
 
                     case "FICHA":
+                        throw new Exception("La creción de fichas está en mantenimiento a causa de futuros cambios en el sistema. Perdón por las molestias.");
+
                         await ctx.Channel.SendMessageAsync("`[ABRIENDO CANAL PRIVADO PARA CREACIÓN DE FICHA. DESCARGANDO TUTORIAL...]`");
                         await Task.Delay(2000);
                         await Ficha(ctx);
@@ -85,20 +87,20 @@ namespace Bigotes.Commands
 
                 #region Título de la encuesta
                 await author.SendMessageAsync("`[ABRIENDO FORMULARIO DE ENCUESTA]` ```Inserte-título-de-la-encuesta:```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 titulo = interMSG.Content;
                 #endregion
 
                 #region Recogida y gestión de la duración de la encuesta
                 await author.SendMessageAsync("`[TÍTULO REGISTRADO]` ```Orden-recibida.-Preciso-concretar-duración-en-minutos(m),-horas(h)-o-días(d):```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 string durationSTR = interMSG.Content.Trim(), unidadRespuesta;
                 int durationINT = 0;
 
                 while (!Regex.IsMatch(durationSTR, @"\d[mhd]"))
                 {
                     await author.SendMessageAsync("`[ERROR]` ```Por-favor,-utilizar-formato-00m,-00h-o-00d.```").ConfigureAwait(false);
-                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author).ConfigureAwait(false)).Result;
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                     durationSTR = interMSG.Content.Trim();
                 }
 
@@ -125,27 +127,27 @@ namespace Bigotes.Commands
                 #region Recogida y gestión del canal en el que realizar la encuesta
                 await author.SendMessageAsync("`[PROCESANDO DURACIÓN]` ```Programada-duración-de-" + durationINT + "-" + unidadRespuesta + ".``` ```Detallar-nombre-de-canal-de-encuesta.-Libertad-de-tomar-canal-actual-en-caso-de-no-existir-petición.```").ConfigureAwait(false);
 
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 string channelName = interMSG.Content;
-                canalEncuesta = Consultas.GetChannel(ctx, channelName, (await ctx.Guild.GetChannelsAsync()).ToList());
+                canalEncuesta = Consultas.GetChannel(ctx, channelName);
                 #endregion
 
                 #region Recogida y gestión de la descripción
                 await author.SendMessageAsync("`[BUSCANDO CANAL]` ```Canal-de encuesta-seleccionado:-" + canalEncuesta.Name + ".``` ```Se-precisa-texto-descriptivo:```").ConfigureAwait(false);
 
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 description = interMSG.Content;
                 #endregion
 
                 #region Registro de número de opciones
                 await author.SendMessageAsync("`[RECOGIENDO DESCRIPCIÓN]` ```¿Número-de-opciones?```");
 
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 numOptions = interMSG.Content;
                 while (!Regex.IsMatch(numOptions, @"\d"))
                 {
                     await author.SendMessageAsync("`[ERROR]` ```Por-favor,-utilizar-formato-de-numero-entero-positivo.```").ConfigureAwait(false);
-                    numOptions = (await interactivity.WaitForMessageAsync(x => x.Author == author).ConfigureAwait(false)).Result.Content;
+                    numOptions = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result.Content;
                 }
                 #endregion
 
@@ -237,14 +239,12 @@ namespace Bigotes.Commands
                 #region DATOS BÁSICOS
                 #region Nombre y apellidos
                 await author.SendMessageAsync("```Ficha-en-blanco-preparada. Comenzando-por-DATOS-BÁSICOS. 1: Nombre.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.nombre_completo = interMSG.Content;
-                await interMSG.DeleteAsync();
 
                 await author.SendMessageAsync("`[NOMBRE GUARDADO: " + nuevaFicha.nombre_completo + "]` ```2: Apellidos.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.apellidos = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Género
@@ -278,14 +278,13 @@ namespace Bigotes.Commands
                 #region Edad
                 //await author.SendMessageAsync("```4: Año-de-nacimiento.```").ConfigureAwait(false);
                 int anio;
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 while (!Int32.TryParse(interMSG.Content, out anio))
                 {
                     await author.SendMessageAsync("`[ERROR]` ```Insertar-número-válido-para-el-año-de-nacimiento.```").ConfigureAwait(false);
-                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 }
                 nuevaFicha.bird_year = anio;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Raza
@@ -342,106 +341,95 @@ namespace Bigotes.Commands
                 #endregion
 
                 #region Ocupación
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.ocupacion = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
                 #endregion
 
                 #region DATOS FÍSICOS
                 #region Descripción física
                 await author.SendMessageAsync("`[OCUPACIÓN GUARDADA: " + nuevaFicha.ocupacion +"]` ```Pasando-a-DATOS-FÍSICOS. 7: Descripción-física.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descripcion_fisica = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Altura y peso
                 await author.SendMessageAsync("`[DESCRIPCIÓN FÍSICA GUARDADA]` ```8: Altura-aproximada.```").ConfigureAwait(false);
                 double altura;
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 while (!Double.TryParse(interMSG.Content, out altura))
                 {
                     await author.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
-                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 }
                 nuevaFicha.altura = altura;
-                await interMSG.DeleteAsync();
+                
 
                 await author.SendMessageAsync("`[ALTURA GUARDADA: " + nuevaFicha.altura + "]` ```9: Peso-aproximado.```").ConfigureAwait(false);
                 double peso;
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 while (!Double.TryParse(interMSG.Content, out peso))
                 {
                     await author.SendMessageAsync("`[ERROR]` ```Insertar-número-válido.```").ConfigureAwait(false);
-                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                    interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 }
                 nuevaFicha.peso = peso;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Condición física
                 await author.SendMessageAsync("`[PESO GUARDADO: " + nuevaFicha.peso + "]` ```10: Condición-física.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.condicion_fisica = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Color de ojos y pelo
                 await author.SendMessageAsync("`[CONDICIÓN FÍSICA GUARDADA]` ```11: Color-de-ojos.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.color_ojos = interMSG.Content;
-                await interMSG.DeleteAsync();
+                
 
                 await author.SendMessageAsync("`[COLOR DE OJOS GUARDADO: " + nuevaFicha.color_ojos + "]` ```12: Color-de-pelo.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.color_pelo = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Rasgos característicos
                 await author.SendMessageAsync("`[COLOR DE PELO GUARDADO: " + nuevaFicha.color_pelo + "]` ```13: Rasgos-característicos.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.rasgos_caracteristicos = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
                 #endregion
 
                 #region DATOS PSICOLÓGICOS
                 #region Descripción psicológica
                 await author.SendMessageAsync("`[RASGOS GUARDADOS]` ```Pasando-a-DATOS-PSICOLÓGICOS. 14: Descripción-psicológica.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descripcion_psicologica = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Disgustos
                 await author.SendMessageAsync("`[DESCRIPCIÓN PSICOLÓGICA GUARDADA]` ```15: Disgustos.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.disgustos = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Habilidades
                 await author.SendMessageAsync("`[DISGUSTOS GUARDADOS]` ```16: Habilidades.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.habilidades = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 #region Debilidades
                 await author.SendMessageAsync("`[HABILIDADES GUARDADAS]` ```17: Debilidades.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.debilidades = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
                 #endregion
 
                 #region HISTORIA PERSONAL
                 await author.SendMessageAsync("`[DEBILIDADES GUARDADAS]` ```Insertar-a-continuación-historia-personal. Puede-ser-texto, un-enlace-a-documento-o-dejarlo-en-blanco.```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
-                nuevaFicha.historia_personal = interMSG.Content;
-                await interMSG.DeleteAsync();
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
+                nuevaFicha.historia_personal = interMSG.Content;                
                 #endregion
 
                 #region CARACTERÍSTICAS
@@ -461,7 +449,7 @@ namespace Bigotes.Commands
                     + "a-repartir-son-10, pudiendo-dar-comó-máximo-4-a-cada-característica, a-excepción-de-**MAGIA**, donde-el-máximo-serán-3.\nPresionar-cada-icono-hasta-alcanzar-cantidad-deseada-o-máxima. Para-**restar**, pulsar " + arrow_down_smallEmoji + "-y-la-característica-concreta. Puede-haber-números-negativos-en-función-"
                     + "de-las-cualidades-del-personaje. Al-**terminar**, pulsar " + white_check_markEmoji + ". En-caso-de-querer-**reiniciar**, pulsar " + xEmoji + ".").ConfigureAwait(false);
 
-                var caracteristicasMSG = await ctx.Channel.SendMessageAsync("```CONTADOR:``` :muscle: FUERZA: " + nuevaFicha.FUERZA + "\n:juggler: DESTREZA: " + nuevaFicha.DESTREZA + "\n:brain: INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "\n:dancer: CARISMA: "
+                var caracteristicasMSG = await author.SendMessageAsync("```CONTADOR:``` :muscle: FUERZA: " + nuevaFicha.FUERZA + "\n:juggler: DESTREZA: " + nuevaFicha.DESTREZA + "\n:brain: INTELIGENCIA: " + nuevaFicha.INTELIGENCIA + "\n:dancer: CARISMA: "
                     + nuevaFicha.CARISMA + "\n:eye: PERCEPCION: " + nuevaFicha.PERCEPCION + "\n:magic_wand: MAGIA: " + nuevaFicha.MAGIA + "\n**TOTAL**: " + nuevaFicha.TOTALES + "").ConfigureAwait(false);
 
                 await caracteristicasMSG.CreateReactionAsync(muscleEmoji).ConfigureAwait(false);
@@ -484,7 +472,7 @@ namespace Bigotes.Commands
                     while (emoji == null || !(new[] { muscleEmoji, jugglerEmoji, brainEmoji, dancerEmoji, eyeEmoji, magic_wandEmoji, arrow_down_smallEmoji, white_check_markEmoji, xEmoji }.Contains(emoji)))
                     {
                         if (emoji != null) await author.SendMessageAsync("`[ERROR]` ```Es-necesario-elegir-uno-de-los-iconos-nombrados.```").ConfigureAwait(false);
-                        emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
+                        emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == author).ConfigureAwait(false)).Result.Emoji;
                     }
 
                     string[] msgError = { "", "", "", "", "", "", "" };
@@ -497,7 +485,7 @@ namespace Bigotes.Commands
                     {
                         if (emoji == arrow_down_smallEmoji)
                         {
-                            emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == ctx.Member).ConfigureAwait(false)).Result.Emoji;
+                            emoji = (await interactivity.WaitForReactionAsync(x => x.Message == caracteristicasMSG && x.User == author).ConfigureAwait(false)).Result.Emoji;
                             addValue = -1;
                         }
 
@@ -598,30 +586,29 @@ namespace Bigotes.Commands
                 }
 
                 await author.SendMessageAsync("`[CONTADOR GUARDADO]` ```Necesarios-descriptores-sobre-cada-característica. Por-ejemplo: \"INTELIGENCIA: Erutido\" o \"DESTREZA: Pistolero\"```").ConfigureAwait(false);
-                await caracteristicasMSG.ModifyAsync("```¿Fuerza?```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                await author.SendMessageAsync("```¿Fuerza?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descriptorFUERZA = interMSG.Content;
-                await interMSG.DeleteAsync();
-                await caracteristicasMSG.ModifyAsync("```¿Destreza?```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                
+                await author.SendMessageAsync("```¿Destreza?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descriptorDESTREZA = interMSG.Content;
-                await interMSG.DeleteAsync();
-                await caracteristicasMSG.ModifyAsync("```¿Inteligencia?```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                
+                await author.SendMessageAsync("```¿Inteligencia?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descriptorINTELIGENCIA = interMSG.Content;
-                await interMSG.DeleteAsync();
-                await caracteristicasMSG.ModifyAsync("```¿Carisma?```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                
+                await author.SendMessageAsync("```¿Carisma?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descriptorCARISMA = interMSG.Content;
-                await interMSG.DeleteAsync();
-                await caracteristicasMSG.ModifyAsync("```¿Percepcion?```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                
+                await author.SendMessageAsync("```¿Percepcion?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descriptorPERCEPCION = interMSG.Content;
-                await interMSG.DeleteAsync();
-                await caracteristicasMSG.ModifyAsync("```¿Magia?```").ConfigureAwait(false);
-                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == ctx.Member).ConfigureAwait(false)).Result;
+                
+                await author.SendMessageAsync("```¿Magia?```").ConfigureAwait(false);
+                interMSG = (await interactivity.WaitForMessageAsync(x => x.Author == author && x.Channel.IsPrivate).ConfigureAwait(false)).Result;
                 nuevaFicha.descriptorMAGIA = interMSG.Content;
-                await interMSG.DeleteAsync();
                 #endregion
 
                 await author.SendMessageAsync("`[CARACTERÍSTICAS TERMINADAS]` ```Mostrando-resultado-final...```").ConfigureAwait(false);
@@ -633,7 +620,7 @@ namespace Bigotes.Commands
                     Color = color,
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embedFicha).ConfigureAwait(false);
+                await author.SendMessageAsync(embed: embedFicha).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -660,7 +647,7 @@ namespace Bigotes.Commands
                 await ctx.Channel.SendMessageAsync("```Indicar-nombre-del-canal-de-evento: ```").ConfigureAwait(false);
                 channelMSG = await interactivity.WaitForMessageAsync(x => x.Channel == ctx.Channel && x.Author == ctx.Member).ConfigureAwait(false);
                 string channelName = channelMSG.Result.Content;
-                canalEvento = Consultas.GetChannel(ctx, channelName, (await ctx.Guild.GetChannelsAsync()).ToList());
+                canalEvento = Consultas.GetChannel(ctx, channelName);
 
                 //ulong channelID = 0;
                 //while (!ulong.TryParse(channelMSG.Result.Content.Remove(0, 2).Replace('>', ' ').Trim(), out channelID) || channelID == 0)

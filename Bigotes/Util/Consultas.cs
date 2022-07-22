@@ -114,21 +114,20 @@ namespace Bigotes.Util
         /// <param name="channelsList">Lista que ha de obtenerse a través de Guild.GetChannelsAsync, ya que no existe método que no sea
         /// asíncrono y D#plus por algún motivo no tiene absolutamente nada en ctx.Guild.Channels</param>
         /// <returns></returns>
-        public static DiscordChannel GetChannel(CommandContext ctx, string channelName, List<DiscordChannel> channelsList)
+        public static DiscordChannel GetChannel(CommandContext ctx, string channelName)
         {
             DiscordChannel channel = null;
 
             DiscordGuild guild = ctx.Guild;
-            var channels = guild.GetChannelsAsync();
 
-            foreach (var _channel in channelsList)//guild.Channels.Values)
+            foreach (var _channel in guild.Channels)//guild.Channels.Values)
             {
                 String[] tagsID = { "#", "<", ">" };
 
                 //Se compara nombre si se ha puesto únicamente el nombre ("general") o el ID en caso de haber puesto el tag entero ("#general")
-                if (_channel.Name == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
+                if (_channel.Value.Name == channelName.Split(tagsID, StringSplitOptions.RemoveEmptyEntries)[0].Trim())
                 {
-                    channel = _channel;
+                    channel = _channel.Value;
                 }
             }
 
