@@ -121,6 +121,7 @@ namespace Bigotes.Commands
                         var playlist = await Utiles.spotifyClient.Playlists.Get(playlistID);
                         int total = playlist.Tracks.Total ?? default(int);
                         int limit = playlist.Tracks.Limit ?? default(int);
+
                         for (int pagesNum = total/limit; pagesNum >= 0; pagesNum--)
                         {
                             foreach (var _track in playlist.Tracks.Items)
@@ -172,7 +173,8 @@ namespace Bigotes.Commands
                     
                     if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
                     {
-                        await Error.MostrarError(ctx.Channel, $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");;
+                        await Error.MostrarError(ctx.Channel, $"Error al reproducir la pista: {_mpl.playingTrack.Name} de {_mpl.playingTrack.Author}.");
+                        _mpl.playingTrack = null; //Para seguir con la lista hasta encontrar una pista adecuada
                     }
                     else
                     {

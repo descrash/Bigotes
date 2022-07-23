@@ -16,6 +16,7 @@ using DSharpPlus.Lavalink;
 using DSharpPlus.Entities;
 using Bigotes.Clases;
 using SpotifyAPI.Web;
+using DSharpPlus.Interactivity.Enums;
 
 namespace Bigotes
 {
@@ -100,8 +101,9 @@ namespace Bigotes
                 #region Interactividad con el canal (leer, interactuar)
                 Client.UseInteractivity(new InteractivityConfiguration
                 {
-                    PollBehaviour = DSharpPlus.Interactivity.Enums.PollBehaviour.KeepEmojis,
-                    Timeout = TimeSpan.FromMinutes(30) //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
+                    PollBehaviour = PollBehaviour.KeepEmojis,
+                    Timeout = TimeSpan.FromMinutes(30), //Tiempo de espera de interacciones (leer mensajes, p.ej.) HAY LÍMITE
+                    ResponseBehavior =InteractionResponseBehavior.Ack
                 });
                 #endregion
 
