@@ -150,10 +150,10 @@ namespace Bigotes.Util
                     }
 
                     RESULTADOS.Add("Resultado: [" + totalValue + "]");
-                    #endregion
                 }
+                #endregion
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //Esto lo he puesto porque mis compañeros son muy cabrones y no entendían por qué no podían tirar un dado de nueve mil trillones
                 if (ex.Message == "Value was either too large or too small for an Int32.")
