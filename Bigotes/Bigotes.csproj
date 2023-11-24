@@ -30,18 +30,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.2.0" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.2.0" />
-    <PackageReference Include="DSharpPlus.Lavalink" Version="4.2.0" />
-    <PackageReference Include="SpotifyAPI.Web" Version="6.2.2" />
-    <PackageReference Include="SpotifyAPI.Web.Auth" Version="6.2.2" />
+    <PackageReference Include="DSharpPlus" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.4.3" />
+    <PackageReference Include="SpotifyAPI.Web" Version="7.0.2" />
+    <PackageReference Include="SpotifyAPI.Web.Auth" Version="7.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Content\Gifs\" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties config_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>
