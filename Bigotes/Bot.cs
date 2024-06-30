@@ -75,7 +75,8 @@ namespace Bigotes
                 Client = new DiscordClient(config);
                 #endregion
 
-                #region Configuración de Lavalink
+#region Configuración de Lavalink
+#if LAVALINK
                 var endpoint = new ConnectionEndpoint
                 {
                     Hostname = "127.0.0.1",
@@ -90,7 +91,8 @@ namespace Bigotes
                 };
 
                 var lavalink = Client.UseLavalink();
-                #endregion
+#endif
+#endregion
 
                 
 
@@ -131,7 +133,9 @@ namespace Bigotes
                 await Client.ConnectAsync(new DiscordActivity("'Bigotes, ayuda'", ActivityType.ListeningTo));
 
                 //Conexión a lavalink
+#if LAVALINK
                 await lavalink.ConnectAsync(lavalinkConfig);
+#endif
 
                 //Tiempo de espera extra para dar tiempo a procesamiento de peticiones
                 await Task.Delay(-1);
@@ -153,6 +157,6 @@ namespace Bigotes
         {
             return Task.CompletedTask;
         }
-        #endregion
+#endregion
     }
 }
